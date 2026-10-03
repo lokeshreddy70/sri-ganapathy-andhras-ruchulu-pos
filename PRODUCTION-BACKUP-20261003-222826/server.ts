@@ -1462,7 +1462,7 @@ app.patch(
       const branch =
         await db.branch.update({
           where: {
-            id: String(id)
+            id
           },
           data: {
             name:

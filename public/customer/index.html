@@ -1,20 +1,202 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no"><meta name="theme-color" content="#0d4a2f"><title>Order · Sri Ganapathy</title><style>
-:root{--g:#0d4a2f;--g2:#16814d;--gold:#d6a017;--bg:#f6f7f6;--line:#e1e6e3;--ink:#17221d;--muted:#78837d}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,Segoe UI,Arial,sans-serif}.wrap{width:min(680px,100%);margin:auto;padding:12px 12px 100px}.head{background:linear-gradient(135deg,#0a2e20,#0d4a2f);color:#fff;border-radius:14px;padding:16px;display:flex;align-items:center;gap:11px;box-shadow:0 8px 25px #0b35201c}.head img{width:50px;height:50px;border-radius:13px}.head h1{font:700 19px Georgia,serif;margin:0}.head p{font-size:9px;color:#c8d5cf;margin:4px 0 0}.bench{margin-left:auto;background:#d7a017;color:#1b1508;padding:6px 8px;border-radius:6px;font-size:8px;font-weight:900;white-space:nowrap}.search{width:100%;height:42px;border:1px solid var(--line);border-radius:9px;margin:10px 0;background:#fff;padding:0 12px;outline:0;font-size:11px}.cats{display:flex;gap:6px;overflow:auto;margin-bottom:9px}.cat{border:1px solid var(--line);background:#fff;border-radius:20px;padding:7px 10px;font-size:9px;white-space:nowrap}.cat.active{background:#e7f4ec;color:#0b733d;border-color:#6db78e;font-weight:800}.items{display:grid;gap:8px}.item{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px;display:flex;gap:10px;align-items:center}.icon{width:54px;height:54px;border-radius:8px;background:#f0ddb5;display:grid;place-items:center;font-size:28px}.body{flex:1}.body b{font-size:11px}.body small{display:block;color:#7a8580;font-size:9px;line-height:1.4;margin:4px 0}.price{display:block;margin-top:3px;font-weight:900;font-size:11px}.add{border:1px solid #16814d;color:#0d783f;background:#fff;border-radius:6px;padding:8px 10px;font-size:9px;font-weight:900}.cart{position:fixed;bottom:9px;left:50%;transform:translateX(-50%);width:min(656px,calc(100% - 18px));background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 40px #0002;padding:10px;z-index:10}.cartLine{display:flex;justify-content:space-between;font-size:9px;padding:4px 0}.cartTop{display:flex;justify-content:space-between;font-size:10px;font-weight:900}.checkout{width:100%;border:0;background:#0f9549;color:#fff;border-radius:7px;padding:12px;font-size:11px;font-weight:900;margin-top:7px}.success{background:#e9f7ee;border:1px solid #b8dfc5;color:#126d3a;border-radius:10px;padding:14px;margin-top:12px;font-size:10px}.status{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px;margin-top:10px}.track{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:12px}.step{height:7px;border-radius:10px;background:#e1e6e3}.step.on{background:#16814d}.status strong{font-size:14px}.upi{background:#fff8e5;border:1px solid #e7d59a;border-radius:9px;padding:11px;margin-top:9px;font-size:9px}.upi b{font-size:11px}
-</style></head><body><main id="app" class="wrap">Loading menu…</main><script src="/socket.io/socket.io.js"></script><script>
-(async()=>{const token=decodeURIComponent(location.pathname.split('/').pop());const app=document.querySelector('#app');let data,cart=[],cat='All',orderId=null;try{const r=await fetch('/api/public/menu/'+encodeURIComponent(token));if(!r.ok)throw Error('QR inactive');data=await r.json()}catch(e){app.innerHTML=`<div class="head"><img src="/brand/logo-icon.jpg"><div><h1>Sri Ganapathy</h1><p>This QR code is not active.</p></div></div>`;return}
-const icon=c=>({Meals:'🍛',Biryani:'🍲',Tiffins:'🥣',Curries:'🥘',Beverages:'☕',Desserts:'🍮',Combos:'🍱'})[c]||'🍽️';
-function render(){const cats=['All',...new Set(data.menu.map(x=>x.category))];app.innerHTML=`<div class="head"><img src="/brand/logo-icon.jpg"><div><h1>${data.branch.name}</h1><p>${data.branch.phone||''} · Scan & Order</p></div><span class="bench">${data.bench.label}</span></div><input class="search" id="search" placeholder="Search meals, biryani, tiffins…"><div class="cats">${cats.map(c=>`<button class="cat ${c===cat?'active':''}" onclick="setCat('${c.replace(/'/g,"\\'")}')">${c}</button>`).join('')}</div><div class="items">${data.menu.filter(x=>(cat==='All'||x.category===cat)&&(x.name+' '+(x.description||'')).toLowerCase().includes((document.querySelector('#search')?.value||'').toLowerCase())).map(x=>`<article class="item"><div class="icon">${icon(x.category)}</div><div class="body"><b>${x.name}</b><small>${x.description||''}</small><span class="price">₹${Number(x.price).toFixed(2)}</span></div><button class="add" onclick="add('${x.id}')">Add</button></article>`).join('')}</div><div id="cart"></div>`;document.querySelector('#search').oninput=()=>render();renderCart()}
-window.setCat=c=>{cat=c;render()};window.add=id=>{const x=cart.find(x=>x.id===id);if(x)x.qty++;else cart.push({id,qty:1});renderCart()};window.remove=id=>{cart=cart.filter(x=>x.id!==id);renderCart()};function renderCart(){const el=document.querySelector('#cart');if(!el)return;if(!cart.length){el.innerHTML='';return}const total=cart.reduce((a,c)=>a+Number(data.menu.find(x=>x.id===c.id).price)*c.qty,0);el.innerHTML=`<div class="cart"><div class="cartTop"><span>Your order</span><span>${cart.reduce((a,c)=>a+c.qty,0)} item(s)</span></div>${cart.map(c=>{const x=data.menu.find(y=>y.id===c.id);return `<div class="cartLine"><span>${x.name} × ${c.qty} <button style="border:0;background:none;color:#b33" onclick="remove('${x.id}')">×</button></span><b>₹${(Number(x.price)*c.qty).toFixed(2)}</b></div>`}).join('')}<div class="cartLine"><b>Total</b><b>₹${total.toFixed(2)}</b></div><button class="checkout" onclick="sendOrder()">Send Order · ₹${total.toFixed(2)}</button></div>`}
-window.sendOrder=async()=>{if(!cart.length)return;const customer=prompt('Name (optional)')||'';const notes=prompt('Special note (optional)')||'';const clientRequestId=crypto.randomUUID();try{const r=await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({branchId:data.branch.id,benchId:data.bench.id,source:'QR',customerName:customer,notes,clientRequestId,lines:cart})});const o=await r.json();if(!r.ok)throw Error(o.error);orderId=o.id;showStatus(o);cart=[]}catch(e){alert(e.message)}};
-function showStatus(o){app.innerHTML=`<div class="head"><img src="/brand/logo-icon.jpg"><div><h1>Order received</h1><p>${data.branch.name} · ${data.bench.label}</p></div></div><div class="success"><b>Order #${o.number}</b><br>Your order is now with the canteen team.</div><div id="status" class="status"><strong>Status: ${o.status}</strong><div class="track"><i class="step on"></i><i class="step"></i><i class="step"></i><i class="step"></i></div></div>${data.branch.paymentUpiEnabled&&data.branch.upiId?`<div class="upi"><b>UPI payment</b><br>Pay to ${data.branch.upiName||data.branch.upiId} · ${data.branch.upiId}<br><img src="/api/public/payment-qr/${data.branch.id}.png" style="width:145px;height:145px;display:block;margin:8px auto;background:#fff"><small>Scan to pay. Payment confirmation remains controlled by the canteen.</small></div>`:''}`;connectStatus()}
-function connectStatus(){const socket=io();socket.emit('join:order',orderId);socket.on('order:update',o=>{if(o.id!==orderId)return;const labels={PENDING:1,ACCEPTED:1,PREPARING:2,READY:3,SERVED:4,COMPLETED:4,CANCELLED:0};const n=labels[o.status]||0;const el=document.querySelector('#status');if(el)el.innerHTML=`<strong>Status: ${o.status}</strong><div class="track">${[1,2,3,4].map(i=>`<i class="step ${i<=n?'on':''}"></i>`).join('')}</div>`})}
-render();})();
-</script></body></html>
+<!doctype html>
+<html lang="en">
 
+<head>
 
+  <meta charset="UTF-8">
 
+  <meta
+    name="viewport"
+    content="width=device-width,initial-scale=1,viewport-fit=cover"
+  >
 
+  <meta
+    name="theme-color"
+    content="#111111"
+  >
 
+  <title>Order</title>
 
+  <link
+    rel="stylesheet"
+    href="/customer/styles.css"
+  >
 
+</head>
 
+<body>
+
+  <div id="loading" class="customer-loading">
+    <div class="customer-loader"></div>
+    <span>Loading menu...</span>
+  </div>
+
+  <main
+    id="customerApp"
+    class="customer-app hidden"
+  >
+
+    <header class="customer-header">
+
+      <div class="customer-brand">
+
+        <img
+          id="branchLogo"
+          src="/brand/logo-primary.jpg"
+          alt=""
+        >
+
+        <div>
+          <strong
+            id="branchName"
+          >
+            Sri Ganapathy Andhra's Ruchulu
+          </strong>
+
+          <span
+            id="benchName"
+          >
+            -
+          </span>
+        </div>
+
+      </div>
+
+      <button
+        id="cartButton"
+        class="cart-button"
+      >
+        Cart
+        <span id="cartCount">0</span>
+      </button>
+
+    </header>
+
+    <section class="customer-content">
+
+      <div
+        id="customerCategories"
+        class="customer-categories"
+      ></div>
+
+      <div
+        id="customerMenu"
+        class="customer-menu"
+      ></div>
+
+    </section>
+
+  </main>
+
+  <div
+    id="cartDrawer"
+    class="customer-modal hidden"
+  >
+
+    <div class="customer-sheet">
+
+      <div class="customer-sheet-header">
+
+        <h2>
+          Your Order
+        </h2>
+
+        <button
+          id="closeCart"
+          class="customer-close"
+        >
+          ×
+        </button>
+
+      </div>
+
+      <div
+        id="cartItems"
+        class="customer-cart-items"
+      ></div>
+
+      <div class="customer-total-row">
+
+        <span>
+          Total
+        </span>
+
+        <strong id="cartTotal">
+          ₹0.00
+        </strong>
+
+      </div>
+
+      <div class="customer-form">
+
+        <input
+          id="customerName"
+          placeholder="Your name"
+          maxlength="80"
+        >
+
+        <input
+          id="customerPhone"
+          placeholder="Phone number"
+          maxlength="15"
+          inputmode="tel"
+        >
+
+        <textarea
+          id="customerNotes"
+          placeholder="Special instructions (optional)"
+          maxlength="500"
+        ></textarea>
+
+        <button
+          id="placeOrder"
+          class="customer-primary"
+        >
+          Place Order
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <div
+    id="successModal"
+    class="customer-modal hidden"
+  >
+
+    <div class="customer-sheet success-sheet">
+
+      <div class="success-icon">
+        ✓
+      </div>
+
+      <h2>
+        Order received
+      </h2>
+
+      <p>
+        Your order has been sent to the counter.
+      </p>
+
+      <div
+        id="successNumber"
+        class="success-number"
+      ></div>
+
+      <button
+        id="continueOrdering"
+        class="customer-primary"
+      >
+        Continue
+      </button>
+
+    </div>
+
+  </div>
+
+  <script src="/customer/app.js"></script>
+
+</body>
+</html>

@@ -1,311 +1,99 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import type {
-  Request,
-  Response,
-  NextFunction
-} from "express";
-import { db } from "./db.js";
+import { db } from "./db";
 
-const COOKIE_NAME = "sgar_session";
+const JWT_SECRET = process.env.JWT_SECRET;
 
-const JWT_SECRET =
-  process.env.JWT_SECRET || "";
-
-if (
-  !JWT_SECRET ||
-  JWT_SECRET.length < 32
-) {
-  throw new Error(
-    "JWT_SECRET must be configured and at least 32 characters long"
-  );
+if (!JWT_SECRET || JWT_SECRET.length < 32) {
+  throw new Error("JWT_SECRET must be configured and at least 32 characters long");
 }
 
-export type Session = {
-  userId: string;
+export type SessionUser = {
+  id: string;
+  name: string;
+  username: string;
   role: string;
+  active: boolean;
   branchId: string | null;
 };
+
+export async function hashPassword(password: string) {
+  return bcrypt.hash(password, 12);
+}
+
+export async function verifyPassword(
+  password: string,
+  hash: string
+) {
+  return bcrypt.compare(password, hash);
+}
 
 export async function login(
   username: string,
   password: string,
-  branchId?: string
-) {
+  requestedBranchId?: string
+): Promise<SessionUser> {
 
-  const cleanUsername =
-    String(username || "").trim();
+  const user = await db.user.findUnique({
+    where: {
+      username: username.trim()
+    }
+  });
 
-  if (
-    !cleanUsername ||
-    !password
-  ) {
-    return null;
+  if (!user || !user.active) {
+    throw new Error("Invalid username or password");
   }
 
-  const user =
-    await db.user.findUnique({
-      where: {
-        username: cleanUsername
-      },
-      include: {
-        branch: true
-      }
-    });
+  const valid = await verifyPassword(password, user.passwordHash);
 
-  if (!user) {
-    return null;
-  }
-
-  if (!user.active) {
-    return null;
-  }
-
-  const passwordValid =
-    await bcrypt.compare(
-      password,
-      user.passwordHash
-    );
-
-  if (!passwordValid) {
-    return null;
+  if (!valid) {
+    throw new Error("Invalid username or password");
   }
 
   if (
-    branchId &&
+    requestedBranchId &&
     user.branchId &&
-    user.branchId !== branchId
+    requestedBranchId !== user.branchId &&
+    user.role !== "SUPER_ADMIN"
   ) {
-    return null;
+    throw new Error("You do not have access to this branch");
   }
-
-  const token =
-    jwt.sign(
-      {
-        userId: user.id,
-        role: user.role,
-        branchId: user.branchId
-      },
-      JWT_SECRET,
-      {
-        expiresIn: "12h"
-      }
-    );
 
   return {
-    token,
-
-    user: {
-      id: user.id,
-      name: user.name,
-      username: user.username,
-      role: user.role,
-      branchId: user.branchId,
-      branch: user.branch
-    }
+    id: user.id,
+    name: user.name,
+    username: user.username,
+    role: user.role,
+    active: user.active,
+    branchId: user.branchId
   };
-
 }
 
-export function setSession(
-  res: Response,
-  token: string
-) {
-
-  res.cookie(
-    COOKIE_NAME,
-    token,
+export function signSession(user: SessionUser) {
+  return jwt.sign(
     {
-      httpOnly: true,
-      sameSite: "lax",
-      secure:
-        process.env.COOKIE_SECURE === "true",
-      maxAge:
-        12 * 60 * 60 * 1000,
-      path: "/"
+      sub: user.id,
+      role: user.role,
+      branchId: user.branchId
+    },
+    JWT_SECRET!,
+    {
+      expiresIn: "12h"
     }
   );
-
 }
 
-export function clearSession(
-  res: Response
-) {
+export function verifySession(token: string): SessionUser {
+  const payload = jwt.verify(token, JWT_SECRET!) as any;
 
-  res.clearCookie(
-    COOKIE_NAME,
-    {
-      httpOnly: true,
-      sameSite: "lax",
-      secure:
-        process.env.COOKIE_SECURE === "true",
-      path: "/"
-    }
-  );
-
-  res.clearCookie(
-    "kr_session",
-    {
-      path: "/"
-    }
-  );
-
-}
-
-export function requireAuth(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-
-  const cookieToken =
-    req.cookies?.[COOKIE_NAME];
-
-  const authorization =
-    req.headers.authorization || "";
-
-  const bearerToken =
-    authorization
-      .replace(/^Bearer\s+/i, "")
-      .trim();
-
-  const token =
-    cookieToken ||
-    bearerToken;
-
-  if (!token) {
-
-    return res
-      .status(401)
-      .json({
-        error:
-          "Authentication required"
-      });
-
-  }
-
-  try {
-
-    const session =
-      jwt.verify(
-        token,
-        JWT_SECRET
-      ) as Session;
-
-    (req as any).session =
-      session;
-
-    next();
-
-  }
-  catch {
-
-    return res
-      .status(401)
-      .json({
-        error:
-          "Session expired"
-      });
-
-  }
-
-}
-
-export function requireAdmin(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-
-  const role =
-    (req as any).session?.role;
-
-  if (
-    ![
-      "SUPER_ADMIN",
-      "ADMIN",
-      "MANAGER"
-    ].includes(role)
-  ) {
-
-    return res
-      .status(403)
-      .json({
-        error:
-          "Admin access required"
-      });
-
-  }
-
-  next();
-
-}
-
-export function requireSuperAdmin(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-
-  if(
-    (req as any).session?.role !==
-    "SUPER_ADMIN"
-  ){
-
-    return res
-      .status(403)
-      .json({
-        error:
-          "Main admin access required"
-      });
-
-  }
-
-  next();
-
-}
-
-export function branchScope(
-  req: Request
-) {
-
-  const session =
-    (req as any).session as Session;
-
-  const requested =
-    String(
-      req.query.branchId ||
-      req.body?.branchId ||
-      ""
-    ).trim();
-
-  if(
-    session.role === "SUPER_ADMIN" ||
-    session.role === "ADMIN"
-  ){
-
-    return (
-      requested ||
-      session.branchId ||
-      undefined
-    );
-
-  }
-
-  return (
-    session.branchId ||
-    undefined
-  );
-
-}
-
-export async function hashPassword(
-  password: string
-) {
-
-  return bcrypt.hash(
-    password,
-    12
-  );
-
+  return {
+    id: String(payload.sub),
+    name: "",
+    username: "",
+    role: String(payload.role),
+    active: true,
+    branchId: payload.branchId
+      ? String(payload.branchId)
+      : null
+  };
 }

@@ -1462,7 +1462,7 @@ app.patch(
       const branch =
         await db.branch.update({
           where: {
-            id: String(id)
+            id
           },
           data: {
             name:
@@ -1678,7 +1678,7 @@ app.get(
       const item =
         await db.menuItem.findUnique({
           where: {
-            id: String(req.params.id)
+            id: req.params.id
           }
         });
 
@@ -1873,7 +1873,7 @@ app.patch(
       const existing =
         await db.menuItem.findUnique({
           where: {
-            id: String(req.params.id)
+            id: req.params.id
           }
         });
 
@@ -2005,7 +2005,7 @@ app.delete(
       const item =
         await db.menuItem.findUnique({
           where: {
-            id: String(req.params.id)
+            id: req.params.id
           }
         });
 
@@ -2247,7 +2247,7 @@ app.patch(
       const existing =
         await db.bench.findUnique({
           where: {
-            id: String(req.params.id)
+            id: req.params.id
           }
         });
 
@@ -2316,7 +2316,7 @@ app.get(
       const bench =
         await db.bench.findUnique({
           where: {
-            token: String(req.params.token)
+            token: req.params.token
           },
           include: {
             branch: true
@@ -2370,7 +2370,7 @@ app.get(
       const bench =
         await db.bench.findUnique({
           where: {
-            token: String(req.params.token)
+            token: req.params.token
           },
           include: {
             branch: true
@@ -2797,7 +2797,7 @@ app.patch(
       const existing =
         await db.order.findUnique({
           where: {
-            id: String(req.params.id)
+            id: req.params.id
           }
         });
 
@@ -3124,7 +3124,7 @@ app.delete(
       const held =
         await db.heldBill.findUnique({
           where: {
-            id: String(req.params.id)
+            id: req.params.id
           }
         });
 
@@ -3413,7 +3413,7 @@ app.get(
       const order =
         await db.order.findUnique({
           where: {
-            id: String(req.params.id)
+            id: req.params.id
           },
           include: {
             branch: true,

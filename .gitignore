@@ -1,5 +1,6 @@
 node_modules/
 dist/
+.netlify/
 
 .env
 .env.*
@@ -11,23 +12,16 @@ dist/
 *.backup
 *.backup-*
 *.before-*
-*.vercel-backup
 
 BACKUP-*/
 backup-*/
-
 DATABASE-BACKUP-*/
 SGAR-SOURCE-BACKUP-*/
+SGAR-MASTER-*/
+FINAL-*/
+PRODUCTION-REPAIR-BACKUP-*/
 
 .vscode/
 .idea/
 .DS_Store
 Thumbs.db
-
-.vercel/
-.netlify/
-__direct_neon_test.cjs
-__production_admin.cjs
-__production_admin_final.cjs
-__verify_admin.cjs
-

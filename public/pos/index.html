@@ -1,183 +1,707 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
 <head>
+  <meta charset="UTF-8">
 
-<meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width,initial-scale=1,viewport-fit=cover"
+  >
 
-<meta
-  name="viewport"
-  content="width=device-width, initial-scale=1.0"
-/>
+  <meta
+    name="theme-color"
+    content="#111111"
+  >
 
-<meta
-  http-equiv="Cache-Control"
-  content="no-store, no-cache, must-revalidate, max-age=0"
-/>
+  <title>Sri Ganapathy Andhra's Ruchulu</title>
 
-<meta
-  http-equiv="Pragma"
-  content="no-cache"
-/>
+  <link
+    rel="icon"
+    href="/brand/logo-primary.jpg"
+  >
 
-<meta
-  http-equiv="Expires"
-  content="0"
-/>
-
-<title>Sri Ganapathy Andhra's Ruchulu · POS</title>
-
-<link
-  rel="icon"
-  href="/brand/logo-icon.jpg?v=9999"
-/>
-
-<link
-  rel="stylesheet"
-  href="/pos/style.css?v=9999"
-/>
-
+  <link
+    rel="stylesheet"
+    href="/pos/styles.css"
+  >
 </head>
 
 <body>
 
-<div id="app"></div>
+  <div
+    id="splash"
+    class="splash"
+  >
+    <div class="splash-inner">
+      <div class="splash-logo-wrap">
+        <img
+          src="/brand/logo-primary.jpg"
+          alt="Sri Ganapathy Andhra's Ruchulu"
+          class="splash-logo"
+        >
+      </div>
 
-<script>
+      <div class="splash-title">
+        Sri Ganapathy Andhra's Ruchulu
+      </div>
 
-(function(){
+      <div class="splash-loader">
+        <span></span>
+      </div>
+    </div>
+  </div>
 
-  "use strict";
+  <div
+    id="loginScreen"
+    class="screen hidden"
+  >
 
-  /*
-   * POS entry must NEVER blindly show the billing UI.
-   *
-   * First validate the real HttpOnly session.
-   */
+    <div class="login-shell">
 
-  fetch(
-    "/api/me",
-    {
-      method:"GET",
+      <div class="login-brand">
+        <img
+          src="/brand/logo-primary.jpg"
+          alt="Sri Ganapathy Andhra's Ruchulu"
+          class="login-logo"
+        >
 
-      credentials:"include",
+        <h1>
+          Sri Ganapathy Andhra's Ruchulu
+        </h1>
 
-      cache:"no-store",
+        <p>
+          Billing
+        </p>
+      </div>
 
-      headers:{
-        "Accept":"application/json",
-        "Cache-Control":"no-cache"
-      }
-    }
-  )
-  .then(
-    async function(response){
+      <form
+        id="loginForm"
+        class="login-card"
+        autocomplete="on"
+      >
 
-      var text =
-        await response.text();
+        <div class="field">
+          <label for="username">
+            Username
+          </label>
 
-      var data = {};
+          <input
+            id="username"
+            name="username"
+            type="text"
+            autocomplete="username"
+            required
+            autofocus
+          >
+        </div>
 
-      try{
-        data =
-          text
-            ? JSON.parse(text)
-            : {};
-      }catch(_e){
-        data = {};
-      }
+        <div class="field">
+          <label for="password">
+            Password
+          </label>
 
-      if(
-        response.status === 401 ||
-        response.status === 403 ||
-        !data.user
-      ){
+          <div class="password-wrap">
+            <input
+              id="password"
+              name="password"
+              type="password"
+              autocomplete="current-password"
+              required
+            >
 
-        window.location.replace(
-          "/pos/login.html?auth=" +
-          Date.now()
-        );
+            <button
+              type="button"
+              id="togglePassword"
+              class="password-toggle"
+              aria-label="Show password"
+            >
+              Show
+            </button>
+          </div>
+        </div>
 
-        return;
-      }
+        <div
+          id="loginError"
+          class="form-error hidden"
+        ></div>
 
-      if(!response.ok){
+        <button
+          id="loginButton"
+          type="submit"
+          class="primary-button login-button"
+        >
+          Login
+        </button>
 
-        throw new Error(
-          data.error ||
-          "Unable to validate POS session."
-        );
-      }
+      </form>
 
-      /*
-       * Only now load the actual POS application.
-       */
-      var script =
-        document.createElement("script");
+      <div class="login-footer">
+        Sri Ganapathy Andhra's Ruchulu
+      </div>
 
-      script.src =
-        "/pos/app.js?v=" +
-        Date.now();
+    </div>
 
-      script.defer = true;
+  </div>
 
-      document.body.appendChild(script);
+  <div
+    id="posScreen"
+    class="screen hidden"
+  >
 
-    }
-  )
-  .catch(
-    function(error){
+    <header class="topbar">
 
-      console.error(
-        "POS SESSION ERROR:",
-        error
-      );
+      <div class="brand-small">
+        <img
+          src="/brand/logo-primary.jpg"
+          alt=""
+        >
 
-      document.body.innerHTML =
-        '<div style="' +
-        'min-height:100vh;' +
-        'display:flex;' +
-        'align-items:center;' +
-        'justify-content:center;' +
-        'background:#0b0d10;' +
-        'color:white;' +
-        'font-family:system-ui;' +
-        'padding:30px;' +
-        '">' +
-        '<div style="' +
-        'max-width:500px;' +
-        'text-align:center;' +
-        '">' +
-        '<h2>POS session unavailable</h2>' +
-        '<p style="color:#aaa">' +
-        (
-          error.message ||
-          "Please sign in again."
-        ) +
-        '</p>' +
-        '<button onclick="location.replace(' +
-        "'/pos/login.html?auth=' + Date.now()" +
-        ')" style="' +
-        'padding:12px 20px;' +
-        'border:0;' +
-        'border-radius:10px;' +
-        'cursor:pointer;' +
-        '">' +
-        'Return to Login' +
-        '</button>' +
-        '</div>' +
-        '</div>';
+        <div>
+          <strong>
+            Sri Ganapathy Andhra's Ruchulu
+          </strong>
 
-    }
-  );
+          <span id="branchName">
+            POS
+          </span>
+        </div>
+      </div>
 
-})();
+      <div class="top-actions">
 
-</script>
+        <button
+          id="heldBillsButton"
+          class="top-button"
+        >
+          Held
+          <span
+            id="heldCount"
+            class="count-badge"
+          >0</span>
+        </button>
+
+        <button
+          id="salesButton"
+          class="top-button"
+        >
+          Sales
+        </button>
+
+        <button
+          id="profileButton"
+          class="profile-button"
+        >
+          <span id="profileInitial">
+            M
+          </span>
+        </button>
+
+      </div>
+
+    </header>
+
+    <main class="pos-layout">
+
+      <section class="menu-panel">
+
+        <div class="menu-header">
+
+          <div>
+            <h2>Menu</h2>
+
+            <div
+              id="menuMeta"
+              class="muted"
+            >
+              Loading...
+            </div>
+          </div>
+
+          <div class="menu-search">
+
+            <input
+              id="menuSearch"
+              type="search"
+              placeholder="Search item..."
+              autocomplete="off"
+            >
+
+          </div>
+
+        </div>
+
+        <div
+          id="categories"
+          class="categories"
+        ></div>
+
+        <div
+          id="menuGrid"
+          class="menu-grid"
+        ></div>
+
+      </section>
+
+      <aside class="bill-panel">
+
+        <div class="bill-header">
+
+          <div>
+            <h2>Current Bill</h2>
+
+            <span
+              id="billNumberPreview"
+              class="muted"
+            >
+              New bill
+            </span>
+          </div>
+
+          <button
+            id="clearBillButton"
+            class="icon-button danger-soft"
+            title="Clear bill"
+          >
+            Clear
+          </button>
+
+        </div>
+
+        <div class="location-row">
+
+          <label>
+            Location
+          </label>
+
+          <select id="locationSelect">
+            <option value="COUNTER">
+              Counter
+            </option>
+
+            <option value="BENCH_1">
+              Bench 1
+            </option>
+
+            <option value="BENCH_2">
+              Bench 2
+            </option>
+
+            <option value="BENCH_3">
+              Bench 3
+            </option>
+
+            <option value="BENCH_4">
+              Bench 4
+            </option>
+
+            <option value="BENCH_5">
+              Bench 5
+            </option>
+
+            <option value="BENCH_6">
+              Bench 6
+            </option>
+
+            <option value="BENCH_7">
+              Bench 7
+            </option>
+
+            <option value="BENCH_8">
+              Bench 8
+            </option>
+
+            <option value="BENCH_9">
+              Bench 9
+            </option>
+
+            <option value="BENCH_10">
+              Bench 10
+            </option>
+
+            <option value="CUSTOM">
+              Custom
+            </option>
+          </select>
+
+          <input
+            id="customLocation"
+            class="hidden"
+            type="text"
+            placeholder="Location"
+          >
+
+        </div>
+
+        <div class="customer-fields">
+
+          <input
+            id="customerName"
+            type="text"
+            placeholder="Customer name (optional)"
+            maxlength="80"
+          >
+
+          <input
+            id="customerPhone"
+            type="tel"
+            placeholder="Phone (optional)"
+            maxlength="15"
+          >
+
+        </div>
+
+        <div
+          id="billLines"
+          class="bill-lines"
+        >
+
+          <div class="empty-bill">
+            <div class="empty-icon">
+              +
+            </div>
+
+            <strong>
+              Add items to start billing
+            </strong>
+
+            <span>
+              Select any item from the menu
+            </span>
+          </div>
+
+        </div>
+
+        <div class="bill-summary">
+
+          <div>
+            <span>Subtotal</span>
+            <strong id="subtotal">₹0.00</strong>
+          </div>
+
+          <div>
+            <span>Discount</span>
+
+            <div class="discount-input">
+              <span>₹</span>
+
+              <input
+                id="discount"
+                type="number"
+                min="0"
+                step="0.01"
+                value="0"
+              >
+            </div>
+          </div>
+
+          <div id="taxRow">
+            <span>Tax</span>
+            <strong id="tax">₹0.00</strong>
+          </div>
+
+          <div class="bill-total">
+            <span>Total</span>
+            <strong id="total">₹0.00</strong>
+          </div>
+
+        </div>
+
+        <div class="bill-actions">
+
+          <button
+            id="holdButton"
+            class="secondary-button"
+          >
+            Hold Bill
+          </button>
+
+          <button
+            id="completeButton"
+            class="primary-button complete-button"
+          >
+            Complete Bill
+          </button>
+
+        </div>
+
+      </aside>
+
+    </main>
+
+  </div>
+
+  <!-- PROFILE -->
+
+  <div
+    id="profileModal"
+    class="modal hidden"
+  >
+
+    <div class="modal-card small-modal">
+
+      <div class="modal-header">
+        <h3>Account</h3>
+
+        <button
+          class="close-button"
+          data-close="profileModal"
+        >
+          ×
+        </button>
+      </div>
+
+      <div class="profile-view">
+
+        <div
+          id="profileAvatar"
+          class="profile-avatar"
+        >
+          M
+        </div>
+
+        <h3 id="profileName">
+          User
+        </h3>
+
+        <p id="profileUsername">
+          -
+        </p>
+
+        <span
+          id="profileRole"
+          class="role-pill"
+        >
+          -
+        </span>
+
+        <button
+          id="changePasswordButton"
+          class="secondary-button full"
+        >
+          Change Password
+        </button>
+
+        <button
+          id="logoutButton"
+          class="danger-button full"
+        >
+          Logout
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- PASSWORD -->
+
+  <div
+    id="passwordModal"
+    class="modal hidden"
+  >
+
+    <div class="modal-card small-modal">
+
+      <div class="modal-header">
+
+        <h3>
+          Change Password
+        </h3>
+
+        <button
+          class="close-button"
+          data-close="passwordModal"
+        >
+          ×
+        </button>
+
+      </div>
+
+      <form id="passwordForm">
+
+        <div class="field">
+          <label>
+            Current password
+          </label>
+
+          <input
+            id="currentPassword"
+            type="password"
+            required
+          >
+        </div>
+
+        <div class="field">
+          <label>
+            New password
+          </label>
+
+          <input
+            id="newPassword"
+            type="password"
+            minlength="8"
+            required
+          >
+        </div>
+
+        <div
+          id="passwordError"
+          class="form-error hidden"
+        ></div>
+
+        <button
+          class="primary-button full"
+          type="submit"
+        >
+          Change Password
+        </button>
+
+      </form>
+
+    </div>
+
+  </div>
+
+  <!-- HELD BILLS -->
+
+  <div
+    id="heldModal"
+    class="modal hidden"
+  >
+
+    <div class="modal-card large-modal">
+
+      <div class="modal-header">
+
+        <h3>
+          Held Bills
+        </h3>
+
+        <button
+          class="close-button"
+          data-close="heldModal"
+        >
+          ×
+        </button>
+
+      </div>
+
+      <div
+        id="heldList"
+        class="held-list"
+      ></div>
+
+    </div>
+
+  </div>
+
+  <!-- SALES -->
+
+  <div
+    id="salesModal"
+    class="modal hidden"
+  >
+
+    <div class="modal-card large-modal">
+
+      <div class="modal-header">
+
+        <h3>
+          Daily Sales
+        </h3>
+
+        <button
+          class="close-button"
+          data-close="salesModal"
+        >
+          ×
+        </button>
+
+      </div>
+
+      <div class="sales-controls">
+
+        <input
+          id="salesDate"
+          type="date"
+        >
+
+        <button
+          id="loadSalesButton"
+          class="primary-button"
+        >
+          View
+        </button>
+
+      </div>
+
+      <div
+        id="salesResult"
+        class="sales-result"
+      ></div>
+
+    </div>
+
+  </div>
+
+  <!-- RECEIPT -->
+
+  <div
+    id="receiptModal"
+    class="modal hidden"
+  >
+
+    <div class="modal-card receipt-modal">
+
+      <div class="modal-header">
+
+        <h3>
+          Bill Completed
+        </h3>
+
+        <button
+          class="close-button"
+          data-close="receiptModal"
+        >
+          ×
+        </button>
+
+      </div>
+
+      <div
+        id="receiptSummary"
+        class="receipt-summary"
+      ></div>
+
+      <div class="receipt-actions">
+
+        <button
+          id="openReceiptButton"
+          class="primary-button"
+        >
+          Open Bill
+        </button>
+
+        <button
+          id="newBillButton"
+          class="secondary-button"
+        >
+          New Bill
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <div
+    id="toast"
+    class="toast hidden"
+  ></div>
+
+  <script src="/pos/app.js"></script>
 
 </body>
-
 </html>
-
-
-

@@ -1,40 +1,874 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no"><meta name="theme-color" content="#0d4a2f"><title>Sri Ganapathy · Admin</title><style>
-:root{--g:#0d4a2f;--g2:#157c49;--gold:#d6a117;--bg:#f4f6f7;--line:#e2e7e9;--muted:#7b858d;--ink:#18222a}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,Segoe UI,Arial,sans-serif}button,input,select{font:inherit}.bar{height:66px;background:#101918;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 18px;position:sticky;top:0;z-index:10}.brand{display:flex;align-items:center;gap:9px}.brand img{width:38px;height:38px;border-radius:10px}.brand b{display:block;font:700 15px Georgia,serif}.brand small{display:block;color:#8e9c96;font-size:7px;letter-spacing:1.5px}.barActions{display:flex;gap:7px;align-items:center}.barActions button{border:1px solid #33433d;background:#1a2722;color:#fff;border-radius:6px;padding:7px 9px;font-size:9px}.wrap{max-width:1220px;margin:auto;padding:16px}.layout{display:grid;grid-template-columns:180px 1fr;gap:13px}.sideNav{background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px;height:max-content}.sideNav button{width:100%;border:0;background:transparent;text-align:left;padding:9px 10px;border-radius:6px;font-size:10px;color:#5d6870}.sideNav button.active,.sideNav button:hover{background:#eaf5ee;color:#0b743d;font-weight:800}.main{min-width:0}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.card{background:#fff;border:1px solid var(--line);border-radius:9px;padding:13px}.card small{font-size:8px;color:#808a91}.card strong{display:block;font-size:20px;margin-top:5px}.toolbar{display:flex;justify-content:space-between;align-items:center;margin:13px 0 8px}.toolbar h2{margin:0;font-size:17px}.toolbar button,.primary{border:0;background:var(--g);color:#fff;border-radius:6px;padding:8px 11px;font-size:9px;font-weight:800}.table{background:#fff;border:1px solid var(--line);border-radius:9px;overflow:auto}.table table{width:100%;border-collapse:collapse}.table th,.table td{text-align:left;padding:9px 10px;border-bottom:1px solid #eef0f1;font-size:9px;white-space:nowrap}.table th{font-size:8px;color:#818a91;text-transform:uppercase;letter-spacing:.6px;background:#fafbfb}.link{border:0;background:transparent;color:#0a7540;font-size:9px;font-weight:800}.tag{background:#e9f6ee;color:#177644;border-radius:5px;padding:4px 6px;font-size:8px}.modalBack{position:fixed;inset:0;background:#07110dcc;display:none;align-items:center;justify-content:center;z-index:50}.modalBack.show{display:flex}.modal{width:min(650px,94vw);max-height:90vh;overflow:auto;background:#fff;border-radius:11px;padding:18px}.modal h2{margin:0;font-size:17px}.modal p{font-size:9px;color:#7c858d}.form{display:grid;grid-template-columns:1fr 1fr;gap:9px}.field label{display:block;font-size:8px;font-weight:800;color:#606a72;margin-bottom:4px}.field input,.field select{width:100%;height:36px;border:1px solid #dce1e4;border-radius:6px;padding:0 8px;outline:0}.full{grid-column:1/-1}.actions{display:flex;justify-content:flex-end;gap:6px;margin-top:13px}.btn{border:1px solid #dce1e4;background:#fff;border-radius:6px;padding:8px 10px;font-size:9px}.btn.primary{background:var(--g);color:#fff;border-color:var(--g)}.branchCards{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.branchCard{background:#fff;border:1px solid var(--line);border-radius:9px;padding:13px}.branchCard h3{font-size:13px;margin:0}.branchCard p{font-size:9px;color:#7c858d;line-height:1.5}.branchCard .row{display:flex;gap:5px;flex-wrap:wrap}.branchCard a,.branchCard button{border:1px solid #dce1e4;background:#fff;border-radius:5px;padding:6px 8px;font-size:8px;color:#0a6f3b;text-decoration:none}.qr{width:120px;height:120px;object-fit:contain;border:1px solid #e1e5e7;margin-top:8px}.toast{position:fixed;right:18px;bottom:18px;background:#15201b;color:#fff;border-radius:7px;padding:10px 13px;font-size:9px;opacity:0;transition:.2s}.toast.show{opacity:1}@media(max-width:800px){.layout{grid-template-columns:1fr}.sideNav{display:flex;overflow:auto}.sideNav button{min-width:max-content}.cards{grid-template-columns:1fr 1fr}.branchCards{grid-template-columns:1fr}.form{grid-template-columns:1fr}}
-</style></head><body><header class="bar"><div class="brand"><img src="/brand/logo-icon.jpg"><div><b>Sri Ganapathy · Main Admin</b><small>ANDHRA'S RUCHULU · CONTROL CENTER</small></div></div><div class="barActions"><button onclick="location.href='/admin/'">Admin</button><button onclick="location.href='/pos/'">POS</button><button onclick="changePassword()">Change password</button><button onclick="logout()">Sign out</button></div></header><div class="wrap"><div class="layout"><nav class="sideNav"><button class="active" data-tab="overview">Overview</button><button data-tab="branches">Branches</button><button data-tab="menu">Menu</button><button data-tab="users">Staff & Login</button><button data-tab="settings">Business</button><button data-tab="orders">Bills</button><button data-tab="printers">Printers</button></nav><main id="main" class="main"></main></div></div><div id="modal"></div><script>
-const api=async(u,o={})=>{const r=await fetch(u,{credentials:'same-origin',...o,headers:{'Content-Type':'application/json',...(o.headers||{})}});const d=await r.json().catch(()=>({}));if(!r.ok)throw Error(d.error||'Request failed');return d};let branches=[];let activeTab='overview';const money=n=>'₹'+Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});const toast=t=>{const x=document.createElement('div');x.className='toast';x.textContent=t;document.body.appendChild(x);setTimeout(()=>x.classList.add('show'),10);setTimeout(()=>x.remove(),2300)};
-async function init(){try{await api('/api/me');branches=await api('/api/branches');document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{activeTab=b.dataset.tab;document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x===b));render()});render()}catch(e){location.href='/pos/'}}
-async function render(){const m=document.querySelector('#main');if(activeTab==='overview')return overview(m);if(activeTab==='branches')return branchPage(m);if(activeTab==='menu')return menuPage(m);if(activeTab==='users')return usersPage(m);if(activeTab==='settings')return settingsPage(m);if(activeTab==='orders')return ordersPage(m);if(activeTab==='printers')return printersPage(m)}
-async function overview(m){let total={sales:0,orders:0,expenses:0,qr:0};const rows=[];for(const b of branches){const d=await api('/api/dashboard?branchId='+b.id);total.sales+=d.sales;total.orders+=d.orders;total.expenses+=d.expenses;total.qr+=d.qrOrders;rows.push({b,d})}m.innerHTML=`<div class="cards"><div class="card"><small>All branch sales · today</small><strong>${money(total.sales)}</strong></div><div class="card"><small>Orders · today</small><strong>${total.orders}</strong></div><div class="card"><small>Expenses · today</small><strong>${money(total.expenses)}</strong></div><div class="card"><small>QR orders · today</small><strong>${total.qr}</strong></div></div><div class="toolbar"><h2>Branch operations</h2><button onclick="activeTab='branches';render()">Manage branches</button></div><div class="table"><table><thead><tr><th>Branch</th><th>Sales</th><th>Orders</th><th>Expenses</th><th>Pending</th><th>Link</th></tr></thead><tbody>${rows.map(x=>`<tr><td><b>${x.b.name}</b><br><small>${x.b.code}</small></td><td>${money(x.d.sales)}</td><td>${x.d.orders}</td><td>${money(x.d.expenses)}</td><td>${x.d.pending}</td><td><a class="link" href="/b/${x.b.slug}/pos">Open POS</a></td></tr>`).join('')}</tbody></table></div>`}
-function branchPage(m){m.innerHTML=`<div class="toolbar"><h2>Branches</h2><button onclick="branchModal()">+ Add branch</button></div><div class="branchCards">${branches.map(b=>`<article class="branchCard"><h3>${b.name}</h3><p><b>${b.code}</b> · ${b.phone||''}<br>POS: /b/${b.slug}/pos<br>Customer QR links are generated per bench.</p><div class="row"><a href="/b/${b.slug}/pos" target="_blank">Open POS</a><button onclick="editBranch('${b.id}')">Settings</button><button onclick="showBenches('${b.id}')">Bench QR</button></div></article>`).join('')}</div>`}
-function branchModal(){document.querySelector('#modal').innerHTML=`<div class="modalBack show"><div class="modal"><h2>Create branch</h2><p>New branch gets its own secure POS URL, sales login and bench QR codes.</p><div class="form"><div class="field"><label>BRANCH NAME</label><input id="bn"></div><div class="field"><label>BRANCH CODE</label><input id="bc" placeholder="C04"></div><div class="field"><label>SALES USERNAME</label><input id="bu" autocomplete="off" spellcheck="false"></div><div class="field"><label>SALES PASSWORD</label><input id="bp" type="password" autocomplete="new-password"></div><div class="field"><label>PHONE</label><input id="bph" value="9490079466"></div><div class="field"><label>BENCH COUNT</label><input id="bcount" type="number" value="20" min="1" max="500"></div><div class="field full"><label>ADDRESS</label><input id="ba"></div><div class="field"><label>GSTIN (optional)</label><input id="bg"></div></div><div class="actions"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="createBranch()">Create branch</button></div></div></div>`}
-async function createBranch(){try{const b=await api('/api/branches',{method:'POST',body:JSON.stringify({name:bn.value.trim(),code:bc.value.trim(),salesUsername:bu.value.trim(),salesPassword:bp.value,phone:bph.value.trim(),benchCount:Number(bcount.value),address:ba.value.trim(),gstin:bg.value.trim()||undefined})});closeModal();branches=await api('/api/branches');render();alert(`Branch created.\n\nPOS URL:\n${b.posUrl}\n\nGive the sales team only this branch URL and their own login.`)}catch(e){toast(e.message)}}
-async function editBranch(id){const b=await api('/api/branches/'+id+'/settings');document.querySelector('#modal').innerHTML=`<div class="modalBack show"><div class="modal"><h2>${b.name} · Branch settings</h2><p>Everything printed on receipts and branch payment settings can be changed here.</p><div class="form"><div class="field"><label>NAME</label><input id="en" value="${b.name}"></div><div class="field"><label>PHONE</label><input id="eph" value="${b.phone||''}"></div><div class="field"><label>GSTIN</label><input id="eg" value="${b.gstin||''}"></div><div class="field"><label>INVOICE PREFIX</label><input id="eip" value="${b.invoicePrefix}"></div><div class="field"><label>INVOICE TITLE</label><input id="eit" value="${b.invoiceTitle}"></div><div class="field"><label>PAPER WIDTH</label><select id="epw"><option ${b.receiptPaperWidth===80?'selected':''}>80</option><option ${b.receiptPaperWidth===58?'selected':''}>58</option></select></div><div class="field"><label>UPI ID</label><input id="eui" value="${b.upiId||''}"></div><div class="field"><label>UPI NAME</label><input id="eun" value="${b.upiName||''}"></div><div class="field full"><label>RECEIPT HEADER</label><input id="erh" value="${b.receiptHeader||''}"></div><div class="field full"><label>RECEIPT FOOTER</label><input id="erf" value="${b.receiptFooter||''}"></div><div class="field"><label>TAX ENABLED</label><select id="ete"><option value="false" ${!b.taxEnabled?'selected':''}>No</option><option value="true" ${b.taxEnabled?'selected':''}>Yes</option></select></div><div class="field"><label>TAX RATE %</label><input id="etr" type="number" value="${b.taxRate||0}"></div></div><div class="actions"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveBranch('${id}')">Save</button></div></div></div>`}
-async function saveBranch(id){try{await api('/api/branches/'+id,{method:'PATCH',body:JSON.stringify({name:en.value,phone:eph.value,gstin:eg.value||null,invoicePrefix:eip.value,invoiceTitle:eit.value,receiptPaperWidth:Number(epw.value),upiId:eui.value||null,upiName:eun.value||null,receiptHeader:erh.value,receiptFooter:erf.value,taxEnabled:ete.value==='true',taxRate:Number(etr.value)})});closeModal();branches=await api('/api/branches');render();toast('Branch settings saved')}catch(e){toast(e.message)}}
-async function showBenches(id){const rows=await api('/api/benches?branchId='+id);document.querySelector('#modal').innerHTML=`<div class="modalBack show"><div class="modal"><h2>Bench QR codes</h2><p>Every QR is permanently mapped to its branch + bench. Print the PNG at the required physical size.</p><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">${rows.map(b=>`<div style="text-align:center;border:1px solid #e3e7e9;border-radius:8px;padding:8px"><img class="qr" src="/api/benches/${b.id}/qr.png"><b style="display:block;font-size:9px;margin-top:5px">${b.label}</b><a class="link" href="/api/benches/${b.id}/qr.png" download>Download</a></div>`).join('')}</div><div class="actions"><button class="btn" onclick="closeModal()">Close</button></div></div></div>`}
-async function menuPage(m){
- const b=branches[0];const rows=await api('/api/menu?branchId='+b.id);
- m.innerHTML=`<div class="toolbar"><h2>Menu control</h2><div style="display:flex;gap:6px"><select id="menuBranch" style="height:34px;border:1px solid #dce1e4;border-radius:6px;padding:0 8px;font-size:9px">${branches.map(x=>`<option value="${x.id}" ${x.id===b.id?'selected':''}>${x.name}</option>`).join('')}</select><button onclick="menuAdd('${b.id}')">+ Add item</button></div></div><div class="table"><table><thead><tr><th>Item</th><th>Category</th><th>Price</th><th>Barcode</th><th>Status</th><th></th></tr></thead><tbody id="menuRows">${rows.map(x=>menuRow(x)).join('')}</tbody></table></div>`;
- document.querySelector('#menuBranch').onchange=()=>loadBranchMenu(document.querySelector('#menuBranch').value);
-}
-function menuRow(x){return `<tr><td>${x.name}</td><td>${x.category}</td><td>${money(x.price)}</td><td>${x.barcode||'—'}</td><td><span class="tag">${x.active?'Active':'Disabled'}</span></td><td><button class="link" onclick='menuEdit(${JSON.stringify(x)})'>Edit</button></td></tr>`}
-async function loadBranchMenu(id){const rows=await api('/api/menu?branchId='+id);document.querySelector('#menuRows').innerHTML=rows.map(menuRow).join('');}
-window.menuAdd=async branchId=>{const name=prompt('Item name');if(!name)return;const category=prompt('Category','Meals')||'Meals';const price=Number(prompt('Price','0'));if(!price)return;try{await api('/api/menu',{method:'POST',body:JSON.stringify({name,category,price,description:'',active:true,sortOrder:0,branchId})});loadBranchMenu(branchId);toast('Menu item added')}catch(e){toast(e.message)}};
-window.menuEdit=async x=>{const price=Number(prompt('Price',x.price));if(!price)return;const active=confirm('Keep item active?');try{await api('/api/menu/'+x.id,{method:'PATCH',body:JSON.stringify({price,active})});const b=document.querySelector('#menuBranch').value;loadBranchMenu(b);toast('Menu item updated')}catch(e){toast(e.message)}};
-async function usersPage(m){const rows=await api('/api/users');m.innerHTML=`<div class="toolbar"><h2>Staff & logins</h2><button onclick="staffModal()">+ Create user</button></div><div class="table"><table><thead><tr><th>Name</th><th>Username</th><th>Role</th><th>Branch</th><th>Status</th><th></th></tr></thead><tbody>${rows.map(u=>`<tr><td>${u.name}</td><td>${u.username}</td><td>${u.role}</td><td>${u.branch?.name||'All branches'}</td><td>${u.active?'Active':'Disabled'}</td><td><button class="link" onclick="resetUser('${u.id}')">Change password</button></td></tr>`).join('')}</tbody></table></div>`}
-function staffModal(){document.querySelector('#modal').innerHTML=`<div class="modalBack show"><div class="modal"><h2>Create staff login</h2><div class="form"><div class="field"><label>NAME</label><input id="un"></div><div class="field"><label>USERNAME</label><input id="uu" autocomplete="off" spellcheck="false"></div><div class="field"><label>PASSWORD</label><input id="up" type="password" autocomplete="new-password"></div><div class="field"><label>ROLE</label><select id="ur"><option>CASHIER</option><option>KITCHEN</option><option>MANAGER</option><option>ADMIN</option></select></div><div class="field full"><label>BRANCH</label><select id="ub">${branches.map(b=>`<option value="${b.id}">${b.name}</option>`).join('')}</select></div></div><div class="actions"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="createUser()">Create</button></div></div></div>`}
-async function createUser(){try{await api('/api/users',{method:'POST',body:JSON.stringify({name:un.value,username:uu.value,password:up.value,role:ur.value,branchId:ub.value})});closeModal();usersPage(document.querySelector('#main'));toast('User created')}catch(e){toast(e.message)}}
-async function resetUser(id){const p=prompt('New password (8+ characters)');if(!p)return;try{await api('/api/users/'+id+'/password',{method:'PATCH',body:JSON.stringify({password:p})});toast('Password changed')}catch(e){toast(e.message)}}
-async function settingsPage(m){const b=branches[0];const d=await api('/api/branches/'+b.id+'/settings');m.innerHTML=`<div class="toolbar"><h2>Business defaults</h2><button onclick="editBranch('${b.id}')">Edit branch settings</button></div><div class="cards"><div class="card"><small>Business</small><strong style="font-size:15px">${d.name}</strong></div><div class="card"><small>Phone</small><strong style="font-size:15px">${d.phone||'—'}</strong></div><div class="card"><small>GSTIN</small><strong style="font-size:15px">${d.gstin||'Not configured'}</strong></div><div class="card"><small>Receipt</small><strong style="font-size:15px">${d.receiptPaperWidth}mm</strong></div></div>`}
-async function ordersPage(m){const rows=[];for(const b of branches){const o=await api('/api/orders?branchId='+b.id);rows.push(...o.map(x=>({...x,branchName:b.name})))}rows.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));m.innerHTML=`<div class="toolbar"><h2>All bills</h2><button onclick="render()">Refresh</button></div><div class="table"><table><thead><tr><th>Bill</th><th>Branch</th><th>Source</th><th>Total</th><th>Status</th><th>Date</th></tr></thead><tbody>${rows.map(o=>`<tr><td><a class="link" href="/api/orders/${o.id}/pdf" target="_blank">${o.invoiceNumber||o.number}</a></td><td>${o.branchName}</td><td>${o.source}</td><td>${money(o.total)}</td><td>${o.status}</td><td>${new Date(o.createdAt).toLocaleString('en-IN')}</td></tr>`).join('')}</tbody></table></div>`}
-async function printersPage(m){const all=[];for(const b of branches){const p=await api('/api/printers?branchId='+b.id);all.push(...p.map(x=>({...x,branchName:b.name})))}m.innerHTML=`<div class="toolbar"><h2>Printers</h2><button onclick="toast('Add a printer from the branch POS or branch settings')">Printer policy</button></div><div class="table"><table><thead><tr><th>Name</th><th>Branch</th><th>Width</th><th>Connection</th><th>Host</th></tr></thead><tbody>${all.map(p=>`<tr><td>${p.name}</td><td>${p.branchName}</td><td>${p.paperWidth}mm</td><td>${p.connection}</td><td>${p.host||'Agent / Browser'}</td></tr>`).join('')}</tbody></table></div>`}
-function closeModal(){document.querySelector('#modal').innerHTML=''}window.closeModal=closeModal;window.changePassword=async()=>{const c=prompt('Current password');if(c===null)return;const n=prompt('New password');if(!n)return;try{await api('/api/me/password',{method:'PATCH',body:JSON.stringify({currentPassword:c,newPassword:n})});toast('Password changed')}catch(e){toast(e.message)}};window.logout=async()=>{await api('/api/auth/logout',{method:'POST'});location.href='/pos/'};
-init();
-</script></body></html>
+<!doctype html>
+<html lang="en">
 
+<head>
 
+  <meta charset="UTF-8">
 
+  <meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  >
 
+  <meta
+    name="theme-color"
+    content="#111111"
+  >
 
+  <title>Administration</title>
 
+  <link
+    rel="icon"
+    href="/brand/logo-primary.jpg"
+  >
 
+  <link
+    rel="stylesheet"
+    href="/admin/styles.css"
+  >
 
+</head>
+
+<body>
+
+  <div
+    id="adminLogin"
+    class="admin-login"
+  >
+
+    <div class="admin-login-card">
+
+      <img
+        src="/brand/logo-primary.jpg"
+        class="admin-logo"
+        alt=""
+      >
+
+      <h1>
+        Administration
+      </h1>
+
+      <p>
+        Sri Ganapathy Andhra's Ruchulu
+      </p>
+
+      <form id="adminLoginForm">
+
+        <input
+          id="adminUsername"
+          type="text"
+          placeholder="Username"
+          autocomplete="username"
+          required
+        >
+
+        <input
+          id="adminPassword"
+          type="password"
+          placeholder="Password"
+          autocomplete="current-password"
+          required
+        >
+
+        <div
+          id="adminLoginError"
+          class="admin-error hidden"
+        ></div>
+
+        <button
+          class="admin-primary"
+          type="submit"
+        >
+          Login
+        </button>
+
+      </form>
+
+    </div>
+
+  </div>
+
+  <div
+    id="adminApp"
+    class="admin-app hidden"
+  >
+
+    <header class="admin-header">
+
+      <div class="admin-brand">
+
+        <img
+          src="/brand/logo-primary.jpg"
+          alt=""
+        >
+
+        <div>
+          <strong>
+            Sri Ganapathy Andhra's Ruchulu
+          </strong>
+
+          <span>
+            Administration
+          </span>
+        </div>
+
+      </div>
+
+      <div class="admin-header-actions">
+
+        <span
+          id="adminUser"
+          class="admin-user"
+        ></span>
+
+        <button
+          id="adminLogout"
+          class="admin-secondary"
+        >
+          Logout
+        </button>
+
+      </div>
+
+    </header>
+
+    <main class="admin-main">
+
+      <nav class="admin-tabs">
+
+        <button
+          class="admin-tab active"
+          data-tab="menu"
+        >
+          Menu
+        </button>
+
+        <button
+          class="admin-tab"
+          data-tab="branches"
+        >
+          Branches
+        </button>
+
+        <button
+          class="admin-tab"
+          data-tab="benches"
+        >
+          QR Locations
+        </button>
+
+        <button
+          class="admin-tab"
+          data-tab="users"
+        >
+          Users
+        </button>
+
+        <button
+          class="admin-tab"
+          data-tab="settings"
+        >
+          Settings
+        </button>
+
+      </nav>
+
+      <!-- MENU -->
+
+      <section
+        id="tab-menu"
+        class="admin-section"
+      >
+
+        <div class="section-head">
+
+          <div>
+            <h2>Menu</h2>
+
+            <p>
+              Manage items, prices, tax, images and availability.
+            </p>
+          </div>
+
+          <button
+            id="newMenuButton"
+            class="admin-primary"
+          >
+            Add Item
+          </button>
+
+        </div>
+
+        <div
+          id="menuAdminList"
+          class="admin-list"
+        ></div>
+
+      </section>
+
+      <!-- BRANCHES -->
+
+      <section
+        id="tab-branches"
+        class="admin-section hidden"
+      >
+
+        <div class="section-head">
+
+          <div>
+            <h2>Branches</h2>
+
+            <p>
+              Manage branch settings.
+            </p>
+          </div>
+
+          <button
+            id="newBranchButton"
+            class="admin-primary"
+          >
+            Add Branch
+          </button>
+
+        </div>
+
+        <div
+          id="branchList"
+          class="admin-list"
+        ></div>
+
+      </section>
+
+      <!-- BENCHES -->
+
+      <section
+        id="tab-benches"
+        class="admin-section hidden"
+      >
+
+        <div class="section-head">
+
+          <div>
+            <h2>QR Locations</h2>
+
+            <p>
+              Each QR belongs to one branch and one location.
+            </p>
+
+          </div>
+
+          <button
+            id="newBenchButton"
+            class="admin-primary"
+          >
+            Add Location
+          </button>
+
+        </div>
+
+        <div
+          id="benchList"
+          class="admin-list"
+        ></div>
+
+      </section>
+
+      <!-- USERS -->
+
+      <section
+        id="tab-users"
+        class="admin-section hidden"
+      >
+
+        <div class="section-head">
+
+          <div>
+            <h2>Users</h2>
+
+            <p>
+              Manage POS access.
+            </p>
+          </div>
+
+          <button
+            id="newUserButton"
+            class="admin-primary"
+          >
+            Add User
+          </button>
+
+        </div>
+
+        <div
+          id="userList"
+          class="admin-list"
+        ></div>
+
+      </section>
+
+      <!-- SETTINGS -->
+
+      <section
+        id="tab-settings"
+        class="admin-section hidden"
+      >
+
+        <div class="section-head">
+
+          <div>
+            <h2>Branch Settings</h2>
+
+            <p>
+              Receipt, payment and tax settings.
+            </p>
+          </div>
+
+        </div>
+
+        <form
+          id="settingsForm"
+          class="admin-form"
+        >
+
+          <div class="form-grid">
+
+            <label>
+              Branch Name
+              <input id="setName">
+            </label>
+
+            <label>
+              Code
+              <input id="setCode">
+            </label>
+
+            <label>
+              Address
+              <input id="setAddress">
+            </label>
+
+            <label>
+              Phone
+              <input id="setPhone">
+            </label>
+
+            <label>
+              GSTIN
+              <input id="setGstin">
+            </label>
+
+            <label>
+              Invoice Prefix
+              <input id="setInvoicePrefix">
+            </label>
+
+            <label>
+              Invoice Title
+              <input id="setInvoiceTitle">
+            </label>
+
+            <label>
+              Receipt Width
+              <select id="setPaperWidth">
+                <option value="58">
+                  58mm
+                </option>
+
+                <option value="80">
+                  80mm
+                </option>
+              </select>
+            </label>
+
+            <label>
+              UPI ID
+              <input id="setUpiId">
+            </label>
+
+            <label>
+              UPI Name
+              <input id="setUpiName">
+            </label>
+
+            <label>
+              Tax Rate %
+              <input
+                id="setTaxRate"
+                type="number"
+                min="0"
+                step="0.01"
+              >
+            </label>
+
+            <label>
+              Logo URL
+              <input id="setLogoUrl">
+            </label>
+
+          </div>
+
+          <label class="check-row">
+            <input
+              id="setTaxEnabled"
+              type="checkbox"
+            >
+            Enable tax
+          </label>
+
+          <label class="check-row">
+            <input
+              id="setCash"
+              type="checkbox"
+            >
+            Cash
+          </label>
+
+          <label class="check-row">
+            <input
+              id="setUpi"
+              type="checkbox"
+            >
+            UPI
+          </label>
+
+          <label class="check-row">
+            <input
+              id="setCard"
+              type="checkbox"
+            >
+            Card
+          </label>
+
+          <label>
+            Receipt Header
+            <textarea id="setReceiptHeader"></textarea>
+          </label>
+
+          <label>
+            Receipt Footer
+            <textarea id="setReceiptFooter"></textarea>
+          </label>
+
+          <button
+            class="admin-primary"
+            type="submit"
+          >
+            Save Settings
+          </button>
+
+        </form>
+
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- MENU MODAL -->
+
+  <div
+    id="menuModal"
+    class="admin-modal hidden"
+  >
+
+    <div class="admin-modal-card">
+
+      <div class="admin-modal-head">
+
+        <h3 id="menuModalTitle">
+          Add Menu Item
+        </h3>
+
+        <button
+          class="admin-close"
+          data-close="menuModal"
+        >
+          ×
+        </button>
+
+      </div>
+
+      <form
+        id="menuForm"
+        class="admin-form"
+      >
+
+        <input
+          id="menuId"
+          type="hidden"
+        >
+
+        <div class="form-grid">
+
+          <label>
+            Name
+            <input
+              id="menuName"
+              required
+            >
+          </label>
+
+          <label>
+            Category
+            <input
+              id="menuCategory"
+              required
+            >
+          </label>
+
+          <label>
+            Price
+            <input
+              id="menuPrice"
+              type="number"
+              min="0"
+              step="0.01"
+              required
+            >
+          </label>
+
+          <label>
+            Tax %
+            <input
+              id="menuTax"
+              type="number"
+              min="0"
+              step="0.01"
+            >
+          </label>
+
+          <label>
+            HSN
+            <input
+              id="menuHsn"
+            >
+          </label>
+
+          <label>
+            Barcode
+            <input
+              id="menuBarcode"
+            >
+          </label>
+
+          <label>
+            Image URL
+            <input
+              id="menuImage"
+              placeholder="https://..."
+            >
+          </label>
+
+          <label>
+            Sort Order
+            <input
+              id="menuSort"
+              type="number"
+              value="0"
+            >
+          </label>
+
+        </div>
+
+        <label>
+          Description
+          <textarea
+            id="menuDescription"
+          ></textarea>
+        </label>
+
+        <label class="check-row">
+          <input
+            id="menuActive"
+            type="checkbox"
+            checked
+          >
+          Active
+        </label>
+
+        <label class="check-row">
+          <input
+            id="menuSoldOut"
+            type="checkbox"
+          >
+          Sold out
+        </label>
+
+        <button
+          class="admin-primary"
+          type="submit"
+        >
+          Save Item
+        </button>
+
+      </form>
+
+    </div>
+
+  </div>
+
+  <!-- BRANCH MODAL -->
+
+  <div
+    id="branchModal"
+    class="admin-modal hidden"
+  >
+
+    <div class="admin-modal-card">
+
+      <div class="admin-modal-head">
+
+        <h3>
+          Branch
+        </h3>
+
+        <button
+          class="admin-close"
+          data-close="branchModal"
+        >
+          ×
+        </button>
+
+      </div>
+
+      <form
+        id="branchForm"
+        class="admin-form"
+      >
+
+        <input
+          id="branchId"
+          type="hidden"
+        >
+
+        <div class="form-grid">
+
+          <label>
+            Name
+            <input
+              id="branchNameInput"
+              required
+            >
+          </label>
+
+          <label>
+            Code
+            <input
+              id="branchCodeInput"
+              required
+            >
+          </label>
+
+          <label>
+            Slug
+            <input
+              id="branchSlugInput"
+              required
+            >
+          </label>
+
+          <label>
+            Phone
+            <input
+              id="branchPhoneInput"
+            >
+          </label>
+
+          <label>
+            Address
+            <input
+              id="branchAddressInput"
+            >
+          </label>
+
+        </div>
+
+        <button
+          class="admin-primary"
+          type="submit"
+        >
+          Save Branch
+        </button>
+
+      </form>
+
+    </div>
+
+  </div>
+
+  <!-- BENCH MODAL -->
+
+  <div
+    id="benchModal"
+    class="admin-modal hidden"
+  >
+
+    <div class="admin-modal-card">
+
+      <div class="admin-modal-head">
+
+        <h3>
+          QR Location
+        </h3>
+
+        <button
+          class="admin-close"
+          data-close="benchModal"
+        >
+          ×
+        </button>
+
+      </div>
+
+      <form
+        id="benchForm"
+        class="admin-form"
+      >
+
+        <label>
+          Branch
+
+          <select
+            id="benchBranch"
+            required
+          ></select>
+
+        </label>
+
+        <label>
+          Location name
+          <input
+            id="benchLabel"
+            placeholder="Bench 1"
+            required
+          >
+        </label>
+
+        <button
+          class="admin-primary"
+          type="submit"
+        >
+          Create QR Location
+        </button>
+
+      </form>
+
+    </div>
+
+  </div>
+
+  <!-- USER MODAL -->
+
+  <div
+    id="userModal"
+    class="admin-modal hidden"
+  >
+
+    <div class="admin-modal-card">
+
+      <div class="admin-modal-head">
+
+        <h3>
+          User
+        </h3>
+
+        <button
+          class="admin-close"
+          data-close="userModal"
+        >
+          ×
+        </button>
+
+      </div>
+
+      <form
+        id="userForm"
+        class="admin-form"
+      >
+
+        <label>
+          Name
+          <input
+            id="userName"
+            required
+          >
+        </label>
+
+        <label>
+          Username
+          <input
+            id="userUsername"
+            required
+          >
+        </label>
+
+        <label>
+          Password
+          <input
+            id="userPassword"
+            type="password"
+            minlength="8"
+            required
+          >
+        </label>
+
+        <label>
+          Role
+
+          <select
+            id="userRole"
+            required
+          >
+
+            <option value="ADMIN">
+              ADMIN
+            </option>
+
+            <option value="MANAGER">
+              MANAGER
+            </option>
+
+            <option value="CASHIER">
+              CASHIER
+            </option>
+
+            <option value="KITCHEN">
+              KITCHEN
+            </option>
+
+          </select>
+
+        </label>
+
+        <label>
+          Branch
+
+          <select
+            id="userBranch"
+            required
+          ></select>
+
+        </label>
+
+        <button
+          class="admin-primary"
+          type="submit"
+        >
+          Create User
+        </button>
+
+      </form>
+
+    </div>
+
+  </div>
+
+  <div
+    id="adminToast"
+    class="admin-toast hidden"
+  ></div>
+
+  <script src="/admin/app.js"></script>
+
+</body>
+</html>

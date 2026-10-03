@@ -1,19 +1,20 @@
 {
   "name": "sri-ganapathy-andhras-ruchulu-pos",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "private": true,
   "type": "commonjs",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc -p tsconfig.json",
-    "start": "node dist/server.js",
+    "build": "prisma generate && tsc -p tsconfig.json",
+    "start": "node dist/src/server.js",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@netlify/functions": "^6.0.2",
-    "@prisma/client": "^6.16.0",
+    "@prisma/client": "^6.19.3",
     "bcryptjs": "^3.0.2",
     "compression": "^1.8.1",
     "cookie-parser": "^1.4.7",
@@ -37,7 +38,7 @@
     "@types/node": "^24.5.2",
     "@types/pdfkit": "^0.13.8",
     "@types/qrcode": "^1.5.6",
-    "prisma": "^6.16.0",
+    "prisma": "^6.19.3",
     "tsx": "^4.19.1",
     "typescript": "^5.9.2"
   }
