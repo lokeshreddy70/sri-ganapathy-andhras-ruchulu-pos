@@ -612,7 +612,29 @@ app.use((req,res,next)=>{
 
 });
 
-/* END SGAR_MAJOR_LOGIN_CACHE */app.use(express.static(publicDir));
+/* END SGAR_MAJOR_LOGIN_CACHE *//* SGAR_SINGLE_LOGIN_ROUTE */
+
+app.get("/pos/login.html",(req,res)=>{
+
+    res.setHeader(
+        "Cache-Control",
+        "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
+    );
+
+    res.setHeader("Pragma","no-cache");
+    res.setHeader("Expires","0");
+
+    res.sendFile(
+        path.join(
+            publicDir,
+            "pos",
+            "login.html"
+        )
+    );
+
+});
+
+/* END SGAR_SINGLE_LOGIN_ROUTE */app.use(express.static(publicDir));
 app.get("/b/:slug/pos",(_,res)=>res.sendFile(path.join(publicDir,"pos/index.html")));
 app.get("/b/:slug/pos/*rest",(_,res)=>res.sendFile(path.join(publicDir,"pos/index.html")));
 app.get("/admin/*rest",(_,res)=>res.sendFile(path.join(publicDir,"admin/index.html")));
@@ -632,6 +654,7 @@ if (process.env.NETLIFY !== "true") {
 }
 
 export { app };
+
 
 
 

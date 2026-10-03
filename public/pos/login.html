@@ -1,20 +1,30 @@
 <!doctype html>
 <html lang="en">
 <head>
+
 <meta charset="utf-8">
-<meta name="viewport"
-      content="width=device-width,initial-scale=1,viewport-fit=cover">
 
-<meta name="theme-color" content="#15110d">
-<meta name="robots" content="noindex,nofollow,noarchive">
+<meta
+    name="viewport"
+    content="width=device-width,initial-scale=1,viewport-fit=cover">
 
-<title>Sign in · Sri Ganapathy Andhra's Ruchulu</title>
+<meta
+    name="robots"
+    content="noindex,nofollow,noarchive">
 
-<link rel="icon"
-      type="image/jpeg"
-      href="/brand/logo-primary.jpg">
+<meta
+    name="theme-color"
+    content="#17120e">
+
+<title>Sign in | Sri Ganapathy Andhra's Ruchulu</title>
+
+<link
+    rel="icon"
+    type="image/jpeg"
+    href="/brand/logo-primary.jpg">
 
 <style>
+
 *{
     box-sizing:border-box;
 }
@@ -24,6 +34,12 @@ body{
     margin:0;
     width:100%;
     min-height:100%;
+}
+
+body{
+    min-height:100vh;
+    background:#f4f1ed;
+    color:#201a15;
     font-family:
         Inter,
         ui-sans-serif,
@@ -32,59 +48,53 @@ body{
         BlinkMacSystemFont,
         "Segoe UI",
         sans-serif;
-    background:#f5f2ed;
-    color:#211b16;
-}
-
-body{
-    min-height:100vh;
     display:flex;
     align-items:center;
     justify-content:center;
     padding:24px;
 }
 
-.page{
-    width:min(1120px,100%);
-    min-height:680px;
+.login-shell{
+    width:min(1080px,100%);
+    min-height:650px;
     display:grid;
-    grid-template-columns:1.05fr .95fr;
-    background:#fff;
-    border:1px solid #e8e1d8;
-    border-radius:28px;
+    grid-template-columns:1fr 460px;
     overflow:hidden;
-    box-shadow:
-        0 30px 80px rgba(42,31,20,.13);
+    border-radius:28px;
+    background:#fff;
+    border:1px solid #e5ddd4;
+    box-shadow:0 30px 90px rgba(34,25,18,.13);
 }
 
-.brand-side{
+.brand-panel{
     position:relative;
-    padding:64px;
     display:flex;
     flex-direction:column;
     justify-content:space-between;
+    padding:60px;
+    overflow:hidden;
     background:
         linear-gradient(
             145deg,
-            #25180f 0%,
-            #382317 52%,
-            #21150f 100%
+            #26180f 0%,
+            #392418 55%,
+            #1d130d 100%
         );
     color:#fff;
 }
 
-.brand-side:after{
+.brand-panel:before{
     content:"";
     position:absolute;
-    width:320px;
-    height:320px;
-    right:-150px;
-    bottom:-160px;
+    width:420px;
+    height:420px;
+    right:-210px;
+    bottom:-210px;
     border-radius:50%;
     border:1px solid rgba(255,255,255,.08);
     box-shadow:
-        0 0 0 55px rgba(255,255,255,.025),
-        0 0 0 110px rgba(255,255,255,.018);
+        0 0 0 60px rgba(255,255,255,.025),
+        0 0 0 120px rgba(255,255,255,.018);
 }
 
 .brand-content{
@@ -92,76 +102,74 @@ body{
     z-index:2;
 }
 
-.logo{
-    width:82px;
-    height:82px;
-    object-fit:cover;
-    border-radius:20px;
+.brand-logo{
     display:block;
-    margin-bottom:34px;
-    background:#fff;
+    width:78px;
+    height:78px;
+    object-fit:cover;
     padding:4px;
+    border-radius:19px;
+    background:#fff;
+    margin-bottom:34px;
     box-shadow:0 14px 35px rgba(0,0,0,.25);
 }
 
-.eyebrow{
+.brand-kicker{
     margin:0 0 14px;
-    font-size:12px;
-    line-height:1;
-    font-weight:700;
+    font-size:11px;
+    font-weight:800;
     letter-spacing:.16em;
     text-transform:uppercase;
-    color:#d9b894;
+    color:#d9b99b;
 }
 
-.brand-title{
+.brand-name{
     margin:0;
-    max-width:500px;
-    font-size:clamp(34px,4vw,58px);
-    line-height:1.02;
-    letter-spacing:-.045em;
-    font-weight:760;
+    max-width:520px;
+    font-size:clamp(38px,4.6vw,60px);
+    line-height:1;
+    letter-spacing:-.05em;
+    font-weight:780;
 }
 
-.brand-description{
-    max-width:470px;
+.brand-copy{
+    max-width:500px;
     margin:24px 0 0;
-    color:#d7cbc0;
-    font-size:16px;
+    color:#d8cbc0;
+    font-size:15px;
     line-height:1.7;
 }
 
 .brand-footer{
     position:relative;
     z-index:2;
-    color:#9f9185;
-    font-size:12px;
+    color:#a8988a;
+    font-size:11px;
 }
 
-.login-side{
+.form-panel{
     display:flex;
     align-items:center;
     justify-content:center;
-    padding:56px;
-    background:#fff;
+    padding:52px;
 }
 
-.login-box{
-    width:min(410px,100%);
+.form-box{
+    width:100%;
+    max-width:365px;
 }
 
-.login-heading{
+.form-title{
     margin:0;
     font-size:34px;
     line-height:1.1;
-    letter-spacing:-.035em;
-    font-weight:760;
-    color:#201a15;
+    letter-spacing:-.04em;
+    font-weight:780;
 }
 
-.login-subheading{
-    margin:11px 0 32px;
-    color:#7c7167;
+.form-copy{
+    margin:11px 0 30px;
+    color:#81766c;
     font-size:14px;
     line-height:1.6;
 }
@@ -170,55 +178,52 @@ body{
     margin-bottom:18px;
 }
 
-label{
+.field label{
     display:block;
     margin-bottom:8px;
-    color:#302821;
     font-size:13px;
-    font-weight:650;
+    font-weight:700;
 }
 
-.input-wrap{
-    position:relative;
-}
-
-input{
+.field input{
     width:100%;
     height:54px;
-    padding:0 16px;
     border:1px solid #dcd3ca;
-    border-radius:13px;
+    border-radius:12px;
+    padding:0 15px;
     outline:none;
     background:#fff;
     color:#211b16;
     font-size:15px;
-    transition:
-        border-color .18s ease,
-        box-shadow .18s ease;
+    transition:.18s ease;
 }
 
-input.password{
-    padding-right:78px;
+.field input::placeholder{
+    color:#aaa099;
 }
 
-input::placeholder{
-    color:#aaa098;
+.field input:hover{
+    border-color:#c8bdb2;
 }
 
-input:hover{
-    border-color:#c9beb3;
+.field input:focus{
+    border-color:#7e6047;
+    box-shadow:0 0 0 4px rgba(126,96,71,.11);
 }
 
-input:focus{
-    border-color:#806047;
-    box-shadow:0 0 0 4px rgba(128,96,71,.11);
+.password-wrap{
+    position:relative;
 }
 
-.password-toggle{
+.password-wrap input{
+    padding-right:72px;
+}
+
+.show-password{
     position:absolute;
-    right:8px;
-    top:8px;
-    height:38px;
+    right:7px;
+    top:7px;
+    height:40px;
     padding:0 11px;
     border:0;
     border-radius:9px;
@@ -226,34 +231,48 @@ input:focus{
     color:#6f6258;
     cursor:pointer;
     font-size:12px;
-    font-weight:650;
+    font-weight:700;
 }
 
-.password-toggle:hover{
+.show-password:hover{
     background:#f5f1ed;
+}
+
+.login-error{
+    display:none;
+    margin:0 0 18px;
+    padding:12px 14px;
+    border-radius:10px;
+    border:1px solid #edcaca;
+    background:#fff5f5;
+    color:#a32929;
+    font-size:13px;
+    line-height:1.5;
+}
+
+.login-error.visible{
+    display:block;
 }
 
 .login-button{
     width:100%;
     height:55px;
-    margin-top:7px;
+    margin-top:5px;
     border:0;
-    border-radius:13px;
-    background:#25180f;
+    border-radius:12px;
+    background:#26180f;
     color:#fff;
-    font-size:15px;
-    font-weight:700;
+    font-size:14px;
+    font-weight:800;
+    letter-spacing:.01em;
     cursor:pointer;
-    transition:
-        transform .15s ease,
-        opacity .15s ease,
-        box-shadow .15s ease;
-    box-shadow:0 10px 25px rgba(37,24,15,.16);
+    box-shadow:0 12px 28px rgba(38,24,15,.17);
+    transition:.16s ease;
 }
 
 .login-button:hover{
     transform:translateY(-1px);
-    box-shadow:0 13px 30px rgba(37,24,15,.21);
+    box-shadow:0 15px 32px rgba(38,24,15,.22);
 }
 
 .login-button:active{
@@ -261,41 +280,25 @@ input:focus{
 }
 
 .login-button:disabled{
-    opacity:.65;
+    opacity:.62;
     cursor:wait;
     transform:none;
 }
 
-.error{
-    display:none;
-    margin:0 0 18px;
-    padding:12px 14px;
-    border:1px solid #edcaca;
-    border-radius:11px;
-    background:#fff5f5;
-    color:#a32929;
-    font-size:13px;
-    line-height:1.5;
-}
-
-.error.show{
-    display:block;
-}
-
-.status{
-    min-height:20px;
-    margin-top:16px;
-    color:#7c7167;
+.login-status{
+    min-height:18px;
+    margin-top:14px;
+    color:#81766c;
     font-size:12px;
     text-align:center;
 }
 
-.security{
-    margin-top:28px;
-    padding-top:20px;
+.login-security{
+    margin-top:27px;
+    padding-top:19px;
     border-top:1px solid #eee8e2;
     color:#958a80;
-    font-size:11px;
+    font-size:10.5px;
     line-height:1.6;
     text-align:center;
 }
@@ -306,43 +309,33 @@ input:focus{
         padding:14px;
     }
 
-    .page{
-        min-height:auto;
+    .login-shell{
         grid-template-columns:1fr;
-        border-radius:22px;
+        min-height:auto;
     }
 
-    .brand-side{
-        min-height:320px;
-        padding:34px;
+    .brand-panel{
+        min-height:330px;
+        padding:36px;
     }
 
-    .logo{
-        width:64px;
-        height:64px;
-        border-radius:16px;
-        margin-bottom:22px;
+    .brand-logo{
+        width:66px;
+        height:66px;
+        margin-bottom:23px;
     }
 
-    .brand-title{
-        font-size:36px;
+    .brand-name{
+        font-size:38px;
     }
 
-    .brand-description{
-        margin-top:14px;
+    .brand-copy{
+        margin-top:15px;
         font-size:14px;
     }
 
-    .brand-footer{
-        margin-top:35px;
-    }
-
-    .login-side{
-        padding:38px 28px 42px;
-    }
-
-    .login-heading{
-        font-size:30px;
+    .form-panel{
+        padding:40px 28px 44px;
     }
 }
 
@@ -353,237 +346,255 @@ input:focus{
         align-items:stretch;
     }
 
-    .page{
+    .login-shell{
         width:100%;
         min-height:100vh;
         border:0;
         border-radius:0;
     }
 
-    .brand-side{
-        min-height:280px;
-        padding:28px 24px;
+    .brand-panel{
+        min-height:285px;
+        padding:29px 24px;
     }
 
-    .login-side{
-        padding:32px 22px 38px;
+    .form-panel{
+        padding:34px 22px 40px;
+    }
+
+    .form-title{
+        font-size:30px;
     }
 }
+
 </style>
 </head>
 
 <body>
 
-<main class="page">
+<main class="login-shell">
 
-    <section class="brand-side">
+<section class="brand-panel">
 
-        <div class="brand-content">
+<div class="brand-content">
 
-            <img
-                class="logo"
-                src="/brand/logo-primary.jpg"
-                alt="Sri Ganapathy Andhra's Ruchulu">
+<img
+    class="brand-logo"
+    src="/brand/logo-primary.jpg"
+    alt="Sri Ganapathy Andhra's Ruchulu">
 
-            <p class="eyebrow">Restaurant POS</p>
+<p class="brand-kicker">
+Restaurant POS
+</p>
 
-            <h1 class="brand-title">
-                Sri Ganapathy<br>
-                Andhra's Ruchulu
-            </h1>
+<h1 class="brand-name">
+Sri Ganapathy<br>
+Andhra's Ruchulu
+</h1>
 
-            <p class="brand-description">
-                A fast, secure workspace for billing,
-                orders, kitchen operations and restaurant
-                management.
-            </p>
+<p class="brand-copy">
+A focused workspace for restaurant billing,
+orders, kitchen operations and branch management.
+</p>
 
-        </div>
+</div>
 
-        <div class="brand-footer">
-            Authorized staff access only
-        </div>
+<div class="brand-footer">
+Authorized staff access only
+</div>
 
-    </section>
-
-
-    <section class="login-side">
-
-        <div class="login-box">
-
-            <h2 class="login-heading">
-                Welcome back
-            </h2>
-
-            <p class="login-subheading">
-                Sign in to continue to your restaurant workspace.
-            </p>
+</section>
 
 
-            <div
-                id="loginError"
-                class="error"
-                role="alert"
-                aria-live="polite">
-            </div>
+<section class="form-panel">
+
+<div class="form-box">
+
+<h2 class="form-title">
+Welcome back
+</h2>
+
+<p class="form-copy">
+Sign in to continue to your restaurant workspace.
+</p>
+
+<div
+    id="loginError"
+    class="login-error"
+    role="alert"
+    aria-live="polite">
+</div>
+
+<form
+    id="loginForm"
+    autocomplete="on"
+    novalidate>
+
+<div class="field">
+
+<label for="username">
+Username
+</label>
+
+<input
+    id="username"
+    name="username"
+    type="text"
+    autocomplete="username"
+    autocapitalize="none"
+    spellcheck="false"
+    placeholder="Enter your username"
+    required>
+
+</div>
 
 
-            <form
-                id="loginForm"
-                novalidate
-                autocomplete="on">
+<div class="field">
 
-                <div class="field">
+<label for="password">
+Password
+</label>
 
-                    <label for="username">
-                        Username
-                    </label>
+<div class="password-wrap">
 
-                    <input
-                        id="username"
-                        name="username"
-                        type="text"
-                        autocomplete="username"
-                        placeholder="Enter your username"
-                        autocapitalize="none"
-                        spellcheck="false"
-                        required>
+<input
+    id="password"
+    name="password"
+    type="password"
+    autocomplete="current-password"
+    placeholder="Enter your password"
+    required>
 
-                </div>
+<button
+    id="showPassword"
+    class="show-password"
+    type="button">
+Show
+</button>
 
+</div>
 
-                <div class="field">
-
-                    <label for="password">
-                        Password
-                    </label>
-
-                    <div class="input-wrap">
-
-                        <input
-                            id="password"
-                            class="password"
-                            name="password"
-                            type="password"
-                            autocomplete="current-password"
-                            placeholder="Enter your password"
-                            required>
-
-                        <button
-                            id="passwordToggle"
-                            class="password-toggle"
-                            type="button"
-                            aria-label="Show password">
-                            Show
-                        </button>
-
-                    </div>
-
-                </div>
+</div>
 
 
-                <button
-                    id="loginButton"
-                    class="login-button"
-                    type="submit">
-                    Sign in
-                </button>
+<button
+    id="loginButton"
+    class="login-button"
+    type="submit">
+SIGN IN
+</button>
 
-            </form>
+</form>
 
+<div
+    id="loginStatus"
+    class="login-status"
+    aria-live="polite">
+</div>
 
-            <div
-                id="loginStatus"
-                class="status"
-                aria-live="polite">
-            </div>
+<div class="login-security">
+Authenticated production account · branch access controlled
+</div>
 
+</div>
 
-            <div class="security">
-                Your session is protected with a secure
-                HttpOnly authentication cookie.
-            </div>
-
-        </div>
-
-    </section>
+</section>
 
 </main>
 
 
 <script>
+
 (function(){
 
-    "use strict";
+"use strict";
 
-    const form = document.getElementById("loginForm");
-    const username = document.getElementById("username");
-    const password = document.getElementById("password");
-    const button = document.getElementById("loginButton");
-    const errorBox = document.getElementById("loginError");
-    const status = document.getElementById("loginStatus");
-    const toggle = document.getElementById("passwordToggle");
+const form = document.getElementById("loginForm");
+const username = document.getElementById("username");
+const password = document.getElementById("password");
+const button = document.getElementById("loginButton");
+const errorBox = document.getElementById("loginError");
+const statusBox = document.getElementById("loginStatus");
+const showPassword = document.getElementById("showPassword");
 
-    function showError(message){
 
-        errorBox.textContent = message || "Unable to sign in.";
-        errorBox.classList.add("show");
-        status.textContent = "";
+function clearError(){
+
+    errorBox.textContent = "";
+    errorBox.classList.remove("visible");
+
+}
+
+
+function showError(message){
+
+    errorBox.textContent =
+        message ||
+        "Unable to sign in. Please try again.";
+
+    errorBox.classList.add("visible");
+
+    statusBox.textContent = "";
+
+}
+
+
+function loading(value){
+
+    button.disabled = value;
+
+    button.textContent =
+        value
+            ? "SIGNING IN..."
+            : "SIGN IN";
+
+}
+
+
+showPassword.addEventListener(
+    "click",
+    function(){
+
+        const isPassword =
+            password.type === "password";
+
+        password.type =
+            isPassword
+                ? "text"
+                : "password";
+
+        showPassword.textContent =
+            isPassword
+                ? "Hide"
+                : "Show";
 
     }
-
-    function clearError(){
-
-        errorBox.textContent = "";
-        errorBox.classList.remove("show");
-
-    }
-
-    function setLoading(loading){
-
-        button.disabled = loading;
-
-        if(loading){
-
-            button.textContent = "Signing in…";
-            status.textContent = "Checking your account…";
-
-        }else{
-
-            button.textContent = "Sign in";
-
-        }
-
-    }
-
-    toggle.addEventListener("click", function(){
-
-        const visible = password.type === "text";
-
-        password.type = visible ? "password" : "text";
-        toggle.textContent = visible ? "Show" : "Hide";
-        toggle.setAttribute(
-            "aria-label",
-            visible ? "Show password" : "Hide password"
-        );
-
-    });
+);
 
 
-    form.addEventListener("submit", async function(event){
+form.addEventListener(
+    "submit",
+    async function(event){
 
         event.preventDefault();
         event.stopPropagation();
 
         clearError();
 
-        const user = username.value.trim();
-        const pass = password.value;
+        const user =
+            username.value.trim();
+
+        const pass =
+            password.value;
 
         if(!user){
 
             username.focus();
-            showError("Please enter your username.");
+
+            showError(
+                "Please enter your username."
+            );
+
             return;
 
         }
@@ -591,87 +602,108 @@ input:focus{
         if(!pass){
 
             password.focus();
-            showError("Please enter your password.");
+
+            showError(
+                "Please enter your password."
+            );
+
             return;
 
         }
 
-        setLoading(true);
+        loading(true);
 
         try{
 
-            const response = await fetch(
-                "/api/auth/login",
-                {
-                    method:"POST",
-                    credentials:"include",
-                    cache:"no-store",
-                    headers:{
-                        "Content-Type":"application/json",
-                        "Accept":"application/json",
-                        "Cache-Control":"no-cache"
-                    },
-                    body:JSON.stringify({
-                        username:user,
-                        password:pass
-                    })
-                }
-            );
+            const loginResponse =
+                await fetch(
+                    "/api/auth/login",
+                    {
+                        method:"POST",
+                        credentials:"include",
+                        cache:"no-store",
+                        headers:{
+                            "Content-Type":
+                                "application/json",
 
-            let data = {};
+                            "Accept":
+                                "application/json",
+
+                            "Cache-Control":
+                                "no-cache"
+                        },
+                        body:JSON.stringify({
+                            username:user,
+                            password:pass
+                        })
+                    }
+                );
+
+
+            let loginData = {};
 
             try{
-                data = await response.json();
+
+                loginData =
+                    await loginResponse.json();
+
             }catch(_){}
 
-            if(!response.ok){
+
+            if(!loginResponse.ok){
 
                 throw new Error(
-                    data.error ||
-                    data.message ||
+                    loginData.error ||
+                    loginData.message ||
                     "Invalid username or password."
                 );
 
             }
 
-            if(!data.user){
+
+            if(!loginData.user){
 
                 throw new Error(
-                    "Login completed but no user session was returned."
+                    "Authentication session was not created."
                 );
 
             }
 
-            status.textContent = "Signed in. Opening POS…";
 
-            /*
-             * Verify the session cookie before navigating.
-             * This prevents the page from appearing to refresh
-             * while authentication silently failed.
-             */
+            statusBox.textContent =
+                "Verifying session...";
 
-            const sessionResponse = await fetch(
-                "/api/me",
-                {
-                    method:"GET",
-                    credentials:"include",
-                    cache:"no-store",
-                    headers:{
-                        "Accept":"application/json",
-                        "Cache-Control":"no-cache"
+
+            const sessionResponse =
+                await fetch(
+                    "/api/me",
+                    {
+                        method:"GET",
+                        credentials:"include",
+                        cache:"no-store",
+                        headers:{
+                            "Accept":
+                                "application/json",
+
+                            "Cache-Control":
+                                "no-cache"
+                        }
                     }
-                }
-            );
+                );
+
 
             if(!sessionResponse.ok){
 
                 throw new Error(
-                    "Login succeeded but the session could not be verified."
+                    "Login succeeded, but the session could not be verified."
                 );
 
             }
 
-            const sessionData = await sessionResponse.json();
+
+            const sessionData =
+                await sessionResponse.json();
+
 
             if(!sessionData.user){
 
@@ -681,33 +713,47 @@ input:focus{
 
             }
 
+
+            statusBox.textContent =
+                "Opening POS...";
+
+
             /*
-             * Replace the document instead of normal form navigation.
-             * This guarantees there is no POST refresh loop.
+             * ONLY ONE navigation target.
+             * No form reload.
+             * No login.html -> login.html loop.
              */
 
             window.location.replace(
-                "/pos/?auth=" + Date.now()
+                "/pos/?auth=" +
+                Date.now()
             );
 
-        }catch(error){
+        }
+        catch(error){
 
-            console.error("POS login error:", error);
+            console.error(
+                "SGAR LOGIN ERROR:",
+                error
+            );
 
             showError(
                 error &&
                 error.message
                     ? error.message
-                    : "Unable to sign in. Please try again."
+                    : "Unable to sign in."
             );
 
-            setLoading(false);
+            loading(false);
 
         }
 
-    });
+    },
+    true
+);
 
 })();
+
 </script>
 
 </body>
