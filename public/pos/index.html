@@ -1,397 +1,182 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
-<meta name="robots" content="noindex,nofollow">
 
-<title>Sri Ganapathy Andhra's Ruchulu</title>
+<meta charset="UTF-8">
 
-<style>
-*{
-  box-sizing:border-box;
-}
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+/>
 
-html,
-body{
-  margin:0;
-  width:100%;
-  min-height:100%;
-  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  background:#f6f7f9;
-  color:#111827;
-}
+<meta
+  http-equiv="Cache-Control"
+  content="no-store, no-cache, must-revalidate, max-age=0"
+/>
 
-body{
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:24px;
-}
+<meta
+  http-equiv="Pragma"
+  content="no-cache"
+/>
 
-.login-shell{
-  width:100%;
-  max-width:430px;
-}
+<meta
+  http-equiv="Expires"
+  content="0"
+/>
 
-.login-card{
-  background:#ffffff;
-  border:1px solid #e5e7eb;
-  border-radius:22px;
-  padding:34px;
-  box-shadow:0 18px 50px rgba(15,23,42,.10);
-}
+<title>Sri Ganapathy Andhra's Ruchulu · POS</title>
 
-.brand{
-  display:flex;
-  justify-content:center;
-  margin-bottom:24px;
-}
+<link
+  rel="icon"
+  href="/brand/logo-icon.jpg?v=9999"
+/>
 
-.brand img{
-  display:block;
-  width:108px;
-  height:108px;
-  object-fit:contain;
-  border-radius:18px;
-}
+<link
+  rel="stylesheet"
+  href="/pos/style.css?v=9999"
+/>
 
-.title{
-  margin:0;
-  text-align:center;
-  font-size:25px;
-  line-height:1.25;
-  font-weight:750;
-  letter-spacing:-.02em;
-}
-
-.subtitle{
-  margin:8px 0 28px;
-  text-align:center;
-  color:#6b7280;
-  font-size:14px;
-}
-
-.field{
-  margin-bottom:17px;
-}
-
-.field label{
-  display:block;
-  margin-bottom:7px;
-  font-size:13px;
-  font-weight:650;
-  color:#374151;
-}
-
-.field input{
-  width:100%;
-  height:48px;
-  border:1px solid #d1d5db;
-  border-radius:12px;
-  padding:0 14px;
-  outline:none;
-  font-size:16px;
-  color:#111827;
-  background:#fff;
-}
-
-.field input:focus{
-  border-color:#111827;
-  box-shadow:0 0 0 3px rgba(17,24,39,.08);
-}
-
-.password-wrap{
-  position:relative;
-}
-
-.password-wrap input{
-  padding-right:76px;
-}
-
-.show-password{
-  position:absolute;
-  right:9px;
-  top:7px;
-  height:34px;
-  border:0;
-  background:transparent;
-  padding:0 9px;
-  border-radius:8px;
-  color:#4b5563;
-  font-weight:650;
-  cursor:pointer;
-}
-
-.show-password:hover{
-  background:#f3f4f6;
-}
-
-.sign-in{
-  width:100%;
-  height:50px;
-  border:0;
-  border-radius:12px;
-  background:#111827;
-  color:#fff;
-  font-size:15px;
-  font-weight:750;
-  cursor:pointer;
-  margin-top:5px;
-}
-
-.sign-in:hover{
-  background:#1f2937;
-}
-
-.sign-in:disabled{
-  opacity:.65;
-  cursor:not-allowed;
-}
-
-.error{
-  display:none;
-  margin:0 0 15px;
-  padding:11px 12px;
-  border-radius:10px;
-  background:#fef2f2;
-  border:1px solid #fecaca;
-  color:#b91c1c;
-  font-size:13px;
-  line-height:1.4;
-}
-
-.loading{
-  display:none;
-  text-align:center;
-  margin-top:13px;
-  color:#6b7280;
-  font-size:13px;
-}
-
-@media(max-width:520px){
-  body{
-    padding:14px;
-  }
-
-  .login-card{
-    padding:25px 20px;
-    border-radius:18px;
-  }
-
-  .brand img{
-    width:92px;
-    height:92px;
-  }
-
-  .title{
-    font-size:22px;
-  }
-}
-</style>
 </head>
 
 <body>
 
-<main class="login-shell">
-
-  <section class="login-card">
-
-    <div class="brand">
-      <img
-        src="/brand/logo-primary.jpg?v=final-1"
-        alt="Sri Ganapathy Andhra's Ruchulu"
-      >
-    </div>
-
-    <h1 class="title">Sri Ganapathy Andhra's Ruchulu</h1>
-
-    <p class="subtitle">POS Login</p>
-
-    <form id="loginForm" autocomplete="on">
-
-      <div class="field">
-        <label for="username">Username</label>
-        <input
-          id="username"
-          name="username"
-          type="text"
-          autocomplete="username"
-          autocapitalize="none"
-          spellcheck="false"
-          required
-        >
-      </div>
-
-      <div class="field">
-        <label for="password">Password</label>
-
-        <div class="password-wrap">
-
-          <input
-            id="password"
-            name="password"
-            type="password"
-            autocomplete="current-password"
-            required
-          >
-
-          <button
-            type="button"
-            id="showPassword"
-            class="show-password"
-          >Show</button>
-
-        </div>
-      </div>
-
-      <div id="error" class="error"></div>
-
-      <button
-        id="signIn"
-        class="sign-in"
-        type="submit"
-      >
-        SIGN IN
-      </button>
-
-      <div id="loading" class="loading">
-        Signing in...
-      </div>
-
-    </form>
-
-  </section>
-
-</main>
+<div id="app"></div>
 
 <script>
+
 (function(){
 
-  const form = document.getElementById("loginForm");
-  const username = document.getElementById("username");
-  const password = document.getElementById("password");
-  const button = document.getElementById("signIn");
-  const show = document.getElementById("showPassword");
-  const error = document.getElementById("error");
-  const loading = document.getElementById("loading");
+  "use strict";
 
-  function showError(message){
-    error.textContent = message || "Login failed. Please try again.";
-    error.style.display = "block";
-  }
+  /*
+   * POS entry must NEVER blindly show the billing UI.
+   *
+   * First validate the real HttpOnly session.
+   */
 
-  function clearError(){
-    error.textContent = "";
-    error.style.display = "none";
-  }
+  fetch(
+    "/api/me",
+    {
+      method:"GET",
 
-  show.addEventListener("click", function(){
-    if(password.type === "password"){
-      password.type = "text";
-      show.textContent = "Hide";
-    }else{
-      password.type = "password";
-      show.textContent = "Show";
+      credentials:"include",
+
+      cache:"no-store",
+
+      headers:{
+        "Accept":"application/json",
+        "Cache-Control":"no-cache"
+      }
     }
-  });
+  )
+  .then(
+    async function(response){
 
-  form.addEventListener("submit", async function(event){
+      var text =
+        await response.text();
 
-    event.preventDefault();
-    clearError();
-
-    const user = username.value.trim();
-    const pass = password.value;
-
-    if(!user || !pass){
-      showError("Username and password are required.");
-      return;
-    }
-
-    button.disabled = true;
-    loading.style.display = "block";
-
-    try{
-
-      const response = await fetch("/api/auth/login", {
-        method:"POST",
-        credentials:"include",
-        headers:{
-          "Content-Type":"application/json",
-          "Accept":"application/json"
-        },
-        cache:"no-store",
-        body:JSON.stringify({
-          username:user,
-          password:pass
-        })
-      });
-
-      let data = {};
+      var data = {};
 
       try{
-        data = await response.json();
-      }catch(_){}
+        data =
+          text
+            ? JSON.parse(text)
+            : {};
+      }catch(_e){
+        data = {};
+      }
+
+      if(
+        response.status === 401 ||
+        response.status === 403 ||
+        !data.user
+      ){
+
+        window.location.replace(
+          "/pos/login.html?auth=" +
+          Date.now()
+        );
+
+        return;
+      }
 
       if(!response.ok){
 
-        if(response.status === 401){
-          throw new Error("Invalid username or password.");
-        }
-
-        if(response.status === 429){
-          throw new Error("Too many login attempts. Please wait a few minutes.");
-        }
-
-        if(response.status === 502){
-          throw new Error("Production database service is unavailable. Please try again shortly.");
-        }
-
         throw new Error(
           data.error ||
-          "Login service is unavailable."
+          "Unable to validate POS session."
         );
       }
 
-      if(!data.ok){
-        throw new Error(data.error || "Login failed.");
-      }
+      /*
+       * Only now load the actual POS application.
+       */
+      var script =
+        document.createElement("script");
 
-      const meResponse = await fetch("/api/me", {
-        method:"GET",
-        credentials:"include",
-        cache:"no-store",
-        headers:{
-          "Accept":"application/json"
-        }
-      });
+      script.src =
+        "/pos/app.js?v=" +
+        Date.now();
 
-      if(!meResponse.ok){
-        throw new Error("Session could not be established.");
-      }
+      script.defer = true;
 
-      window.location.replace("/pos/?v=" + Date.now());
+      document.body.appendChild(script);
 
-    }catch(err){
+    }
+  )
+  .catch(
+    function(error){
 
-      showError(
-        err && err.message
-          ? err.message
-          : "Login failed."
+      console.error(
+        "POS SESSION ERROR:",
+        error
       );
 
-      button.disabled = false;
-      loading.style.display = "none";
-    }
+      document.body.innerHTML =
+        '<div style="' +
+        'min-height:100vh;' +
+        'display:flex;' +
+        'align-items:center;' +
+        'justify-content:center;' +
+        'background:#0b0d10;' +
+        'color:white;' +
+        'font-family:system-ui;' +
+        'padding:30px;' +
+        '">' +
+        '<div style="' +
+        'max-width:500px;' +
+        'text-align:center;' +
+        '">' +
+        '<h2>POS session unavailable</h2>' +
+        '<p style="color:#aaa">' +
+        (
+          error.message ||
+          "Please sign in again."
+        ) +
+        '</p>' +
+        '<button onclick="location.replace(' +
+        "'/pos/login.html?auth=' + Date.now()" +
+        ')" style="' +
+        'padding:12px 20px;' +
+        'border:0;' +
+        'border-radius:10px;' +
+        'cursor:pointer;' +
+        '">' +
+        'Return to Login' +
+        '</button>' +
+        '</div>' +
+        '</div>';
 
-  });
+    }
+  );
 
 })();
+
 </script>
 
 </body>
+
 </html>
 
 

@@ -549,7 +549,70 @@ function noCache(res:any){
 
 
 
-app.use(express.static(publicDir));
+
+/* SGAR_FINAL_LOGIN_CACHE_HEADERS */
+
+app.use((req,res,next)=>{
+
+  const p = req.path || "";
+
+  if(
+    p === "/" ||
+    p === "/pos" ||
+    p === "/pos/" ||
+    p === "/pos/index.html" ||
+    p === "/pos/login.html" ||
+    p === "/pos/app.js" ||
+    p === "/pos/style.css" ||
+    p.startsWith("/api/")
+  ){
+
+    res.setHeader(
+      "Cache-Control",
+      "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
+    );
+
+    res.setHeader("Pragma","no-cache");
+    res.setHeader("Expires","0");
+  }
+
+  next();
+
+});
+
+/* END SGAR_FINAL_LOGIN_CACHE_HEADERS */
+/* SGAR_MAJOR_LOGIN_CACHE */
+
+app.use((req,res,next)=>{
+
+    const p = req.path || "";
+
+    if(
+        p === "/" ||
+        p === "/pos" ||
+        p === "/pos/" ||
+        p === "/pos/index.html" ||
+        p === "/pos/login.html" ||
+        p === "/pos/app.js" ||
+        p === "/pos/style.css" ||
+        p.startsWith("/api/")
+    ){
+
+        res.setHeader(
+            "Cache-Control",
+            "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
+        );
+
+        res.setHeader("Pragma","no-cache");
+        res.setHeader("Expires","0");
+
+    }
+
+    next();
+
+});
+
+/* END SGAR_MAJOR_LOGIN_CACHE */app.use(express.static(publicDir));
 app.get("/b/:slug/pos",(_,res)=>res.sendFile(path.join(publicDir,"pos/index.html")));
 app.get("/b/:slug/pos/*rest",(_,res)=>res.sendFile(path.join(publicDir,"pos/index.html")));
 app.get("/admin/*rest",(_,res)=>res.sendFile(path.join(publicDir,"admin/index.html")));
@@ -569,4 +632,6 @@ if (process.env.NETLIFY !== "true") {
 }
 
 export { app };
+
+
 
