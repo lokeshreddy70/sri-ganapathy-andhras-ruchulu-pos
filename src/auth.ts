@@ -52,7 +52,24 @@ export async function login(
 ) {
   const normalizedUsername = String(username || "").trim();
 
-  const user = await db.user.findFirst({
+  if (!normalizedUsername || !password) {
+    return null;
+  }
+
+  /*
+   * IMPORTANT:
+   * The existing production database contains both:
+   *
+   *   Lokesh
+   *   lokesh
+   *
+   * Therefore exact username matching MUST happen first.
+   *
+   * Case-insensitive fallback is used only when an exact
+   * username does not exist.
+   */
+
+  let user = await db.user.findFirst({
     where: {
       username: normalizedUsername,
       active: true,
@@ -61,10 +78,29 @@ export async function login(
   });
 
   if (!user) {
+    user = await db.user.findFirst({
+      where: {
+        username: {
+          equals: normalizedUsername,
+          mode: "insensitive"
+        },
+        active: true,
+        ...(branchId ? { branchId } : {})
+      },
+      orderBy: {
+        username: "asc"
+      }
+    });
+  }
+
+  if (!user) {
     return null;
   }
 
-  const valid = await bcrypt.compare(password, user.passwordHash);
+  const valid = await bcrypt.compare(
+    String(password),
+    user.passwordHash
+  );
 
   if (!valid) {
     return null;
@@ -83,7 +119,6 @@ export async function login(
     }
   };
 }
-
 export function setSession(res: Response, token: string) {
   res.cookie(COOKIE_NAME, token, {
     httpOnly: true,
@@ -195,3 +230,4 @@ export function branchScope(
 
   return session.branchId;
 }
+

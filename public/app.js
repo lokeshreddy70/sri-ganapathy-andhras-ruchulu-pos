@@ -1,3 +1,4 @@
+/* SGAR_AUTH_ENDPOINT_FIX_20261005 */
 (() => {
 
 "use strict";
@@ -4500,7 +4501,7 @@ const SGAR_PRODUCTION_SESSION_RESTORE_V1 = true;
     async function getCurrentSession() {
         try {
 
-            const response = await fetch("/api/auth/me", {
+            const response = await fetch("/api/me", {
                 method: "GET",
                 credentials: "include",
                 cache: "no-store",
@@ -4655,7 +4656,7 @@ const SGAR_PRODUCTION_SESSION_RESTORE_V1 = true;
    - Browser NEVER stores password.
    - Browser NEVER stores JWT/session secret.
    - Authentication uses HttpOnly cookie.
-   - Page refresh calls /api/auth/me.
+   - Page refresh calls /api/me.
    - Valid session is restored.
    - Manual logout is the only normal logout action.
    ================================================================= */
@@ -4720,7 +4721,7 @@ const SGAR_PRODUCTION_SESSION_RESTORE_V1 = true;
         try {
 
             const response = await fetch(
-                "/api/auth/me",
+                "/api/me",
                 {
                     method: "GET",
                     credentials: "include",

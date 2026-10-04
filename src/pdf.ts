@@ -6,6 +6,7 @@ import type express from "express";
 function findAsset(...parts: string[]) {
     const candidates = [
         path.join(process.cwd(), ...parts),
+        path.join(process.cwd(), "public", ...parts),
         path.join(process.cwd(), "netlify", "functions", ...parts)
     ];
 
@@ -56,15 +57,13 @@ export async function receiptPdf(
 
     doc.pipe(res);
 
-    const regularFont = findAsset(
-        "fonts",
-        "NotoSansDevanagari-Regular.ttf"
-    );
+    const regularFont =
+        findAsset("fonts", "NotoSans-Regular.ttf") ||
+        findAsset("fonts", "NotoSansDevanagari-Regular.ttf");
 
-    const boldFont = findAsset(
-        "fonts",
-        "NotoSansDevanagari-Bold.ttf"
-    );
+    const boldFont =
+        findAsset("fonts", "NotoSans-Bold.ttf") ||
+        findAsset("fonts", "NotoSansDevanagari-Bold.ttf");
 
     if (regularFont) {
         doc.registerFont("SGAR-Regular", regularFont);
@@ -105,10 +104,9 @@ export async function receiptPdf(
             );
     };
 
-    const logo = findAsset(
-        "assets",
-        "logo-primary.jpg"
-    );
+    const logo =
+        findAsset("brand", "logo-primary.jpg") ||
+        findAsset("assets", "logo-primary.jpg");
 
     if (
         logo &&

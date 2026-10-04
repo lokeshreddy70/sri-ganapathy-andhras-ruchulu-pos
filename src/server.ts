@@ -132,20 +132,31 @@ function requireAuth(
 }
 
 function setSession(
+  req: express.Request,
   res: express.Response,
   user: any
 ) {
   const token = signSession(user);
 
+  const forwardedProto = String(
+    req.headers["x-forwarded-proto"] || ""
+  )
+    .split(",")[0]
+    .trim()
+    .toLowerCase();
+
+  const secure =
+    req.secure === true ||
+    forwardedProto === "https";
+
   res.cookie("sgar_session", token, {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure,
     maxAge: 12 * 60 * 60 * 1000,
     path: "/"
   });
 }
-
 function clearSession(res: express.Response) {
   res.clearCookie("sgar_session", {
     httpOnly: true,
@@ -860,9 +871,7 @@ app.post(
 
       const branchId =
         req.body?.branchId
-          ? String(
-              req.body.branchId
-            )
+          ? String(req.body.branchId)
           : undefined;
 
       if (!username || !password) {
@@ -872,28 +881,44 @@ app.post(
         });
       }
 
-      const user =
+      const authResult =
         await login(
           username,
           password,
           branchId
         );
 
-      setSession(res, user);
+      if (!authResult) {
+        return res.status(401).json({
+          error:
+            "Invalid username or password"
+        });
+      }
+
+      setSession(
+        req,
+        res,
+        authResult.user
+      );
 
       return res.json({
         ok: true,
-        user
+        token: authResult.token,
+        user: authResult.user
       });
 
     } catch (error) {
+      console.error(
+        "POST /api/auth/login failed:",
+        error
+      );
+
       return res.status(401).json({
         error: safeError(error)
       });
     }
   }
 );
-
 app.post(
   "/api/auth/logout",
   (_req, res) => {
@@ -909,12 +934,16 @@ app.get(
   "/api/me",
   requireAuth,
   async (req, res) => {
+    try {
+      const session = (req as any).session;
 
-    const session =
-      (req as any).session;
+      if (!session?.id) {
+        return res.status(401).json({
+          error: "Authentication required"
+        });
+      }
 
-    const user =
-      await db.user.findUnique({
+      const user = await db.user.findUnique({
         where: {
           id: session.id
         },
@@ -924,33 +953,32 @@ app.get(
           username: true,
           role: true,
           active: true,
-          branchId: true,
-          createdAt: true,
-          updatedAt: true,
-          branch: {
-            select: {
-              id: true,
-              name: true,
-              code: true,
-              slug: true,
-              active: true
-            }
-          }
+          branchId: true
         }
       });
 
-    if (!user) {
-      return res.status(404).json({
-        error: "User not found"
+      if (!user || !user.active) {
+        clearSession(res);
+
+        return res.status(401).json({
+          error: "Session expired"
+        });
+      }
+
+      return res.json({
+        ok: true,
+        user
+      });
+
+    } catch (error) {
+      console.error("GET /api/me failed:", error);
+
+      return res.status(500).json({
+        error: "Unable to load account"
       });
     }
-
-    return res.json({
-      user
-    });
   }
 );
-
 app.post(
   "/api/me/password",
   requireAuth,
