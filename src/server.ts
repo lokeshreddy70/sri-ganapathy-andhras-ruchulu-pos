@@ -1,3 +1,4 @@
+import { receiptPdf } from "./pdf";
 import "dotenv/config";
 
 import express from "express";
@@ -3404,231 +3405,7 @@ app.get(
    RECEIPT PDF
    ============================================================ */
 
-app.get(
-  "/api/orders/:id/pdf",
-  requireAuth,
-  async (req, res) => {
 
-    try {
-      const order =
-        await db.order.findUnique({
-          where: {
-            id: String(req.params.id)
-          },
-          include: {
-            branch: true,
-            bench: true,
-            cashier: {
-              select: {
-                name: true
-              }
-            },
-            lines: {
-              include: {
-                menuItem: true
-              }
-            }
-          }
-        });
-
-      if (!order) {
-        return res.status(404).json({
-          error:
-            "Order not found"
-        });
-      }
-
-      if (
-        !(await ensureBranchAccess(
-          req,
-          order.branchId
-        ))
-      ) {
-        return res.status(403).json({
-          error:
-            "Branch access denied"
-        });
-      }
-
-      const doc =
-        new PDFDocument({
-          size:
-            order.branch.receiptPaperWidth === 58
-              ? [164, 800]
-              : [226, 1000],
-          margin: 12
-        });
-
-      res.setHeader(
-        "Content-Type",
-        "application/pdf"
-      );
-
-      res.setHeader(
-        "Content-Disposition",
-        `inline; filename="${order.invoiceNumber || order.number}.pdf"`
-      );
-
-      doc.pipe(res);
-
-      const center = (
-        text: string,
-        size = 9
-      ) => {
-        doc
-          .fontSize(size)
-          .text(
-            text,
-            {
-              align: "center"
-            }
-          );
-      };
-
-      center(
-        order.branch.name,
-        13
-      );
-
-      if (order.branch.address) {
-        center(
-          order.branch.address
-        );
-      }
-
-      if (order.branch.phone) {
-        center(
-          `Phone: ${order.branch.phone}`
-        );
-      }
-
-      if (order.branch.gstin) {
-        center(
-          `GSTIN: ${order.branch.gstin}`
-        );
-      }
-
-      center(
-        order.branch.invoiceTitle ||
-        "TAX INVOICE",
-        11
-      );
-
-      doc.moveDown(0.4);
-
-      doc.fontSize(9);
-
-      doc.text(
-        `Bill No: ${order.invoiceNumber || order.number}`
-      );
-
-      doc.text(
-        `Date: ${new Date(order.createdAt).toLocaleString("en-IN")}`
-      );
-
-      doc.text(
-        `Cashier: ${order.cashier?.name || "-"}`
-      );
-
-      doc.text(
-        `Payment: ${order.paymentMethod || "UNPAID"}`
-      );
-
-      doc.text(
-        `Location: ${
-          order.bench?.label ||
-          "Counter"
-        }`
-      );
-
-      if (order.customerName) {
-        doc.text(
-          `Customer: ${order.customerName}`
-        );
-      }
-
-      if (order.customerPhone) {
-        doc.text(
-          `Phone: ${order.customerPhone}`
-        );
-      }
-
-      doc.moveDown(0.4);
-
-      doc.text(
-        "--------------------------------"
-      );
-
-      for (const line of order.lines) {
-        const name =
-          line.menuItem.name;
-
-        const qty =
-          line.quantity;
-
-        const amount =
-          money(line.lineTotal)
-            .toFixed(2);
-
-        doc.text(
-          `${name}`
-        );
-
-        doc.text(
-          `${qty} x Γé╣${money(line.unitPrice).toFixed(2)}     Γé╣${amount}`
-        );
-      }
-
-      doc.text(
-        "--------------------------------"
-      );
-
-      doc.text(
-        `Subtotal: Γé╣${money(order.subtotal).toFixed(2)}`
-      );
-
-      if (money(order.discount) > 0) {
-        doc.text(
-          `Discount: Γé╣${money(order.discount).toFixed(2)}`
-        );
-      }
-
-      if (money(order.tax) > 0) {
-        doc.text(
-          `Tax: Γé╣${money(order.tax).toFixed(2)}`
-        );
-      }
-
-      doc
-        .fontSize(12)
-        .text(
-          `TOTAL: Γé╣${money(order.total).toFixed(2)}`
-        );
-
-      doc.moveDown(0.5);
-
-      if (order.branch.receiptFooter) {
-        center(
-          order.branch.receiptFooter
-        );
-      }
-
-      center(
-        "Thank you. Visit again!"
-      );
-
-      doc.end();
-
-    } catch (error) {
-      if (!res.headersSent) {
-        res.status(500).json({
-          error:
-            safeError(error)
-        });
-      }
-    }
-  }
-);
 
 /* ============================================================
    STATIC FILES
@@ -3869,6 +3646,73 @@ if (
     }
   );
 }
+
+/* ============================================================
+   SGAR PRODUCTION RECEIPT PDF
+   ============================================================ */
+
+app.get(
+  "/api/orders/:id/pdf",
+  requireAuth,
+  async (req, res) => {
+    try {
+
+      const order = await db.order.findUnique({
+        where: {
+          id: String(req.params.id)
+        },
+        include: {
+          branch: true,
+          bench: true,
+          cashier: {
+            select: {
+              name: true
+            }
+          },
+          lines: {
+            include: {
+              menuItem: true
+            }
+          }
+        }
+      });
+
+      if (!order) {
+        return res.status(404).json({
+          error: "Order not found"
+        });
+      }
+
+      const session = (req as any).session;
+
+      if (
+        session.role !== "SUPER_ADMIN" &&
+        session.role !== "ADMIN" &&
+        order.branchId !== session.branchId
+      ) {
+        return res.status(403).json({
+          error: "Branch access denied"
+        });
+      }
+
+      await receiptPdf(res, order);
+
+    } catch (error) {
+
+      console.error(
+        "Receipt PDF generation failed:",
+        error
+      );
+
+      if (!res.headersSent) {
+        return res.status(500).json({
+          error: "Unable to generate receipt PDF"
+        });
+      }
+    }
+  }
+);
+
 
 export {
   app,
