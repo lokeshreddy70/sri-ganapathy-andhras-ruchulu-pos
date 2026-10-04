@@ -1,7 +1,15 @@
-import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import type { NextFunction, Request, Response } from "express";
 import { db } from "./db";
+
+const COOKIE_NAME = "sgar_session";
+
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error("JWT_SECRET is required");
+}
 
 export type SessionPayload = {
   id: string;
@@ -9,20 +17,6 @@ export type SessionPayload = {
   role: string;
   branchId: string | null;
 };
-
-const COOKIE_NAME = "sgar_session";
-
-function getJwtSecret() {
-  const secret = process.env.JWT_SECRET;
-
-  if (!secret || secret.trim().length < 32) {
-    throw new Error(
-      "JWT_SECRET is missing or must contain at least 32 characters"
-    );
-  }
-
-  return secret;
-}
 
 export function signSession(user: {
   id: string;
@@ -36,7 +30,7 @@ export function signSession(user: {
       role: user.role,
       branchId: user.branchId ?? null
     },
-    getJwtSecret(),
+    JWT_SECRET,
     {
       expiresIn: "12h"
     }
@@ -44,17 +38,11 @@ export function signSession(user: {
 }
 
 export function verifySession(token: string): SessionPayload {
-  return jwt.verify(token, getJwtSecret()) as SessionPayload;
+  return jwt.verify(token, JWT_SECRET) as SessionPayload;
 }
 
 export async function hashPassword(password: string) {
   return bcrypt.hash(password, 12);
-}
-
-function normalizeUsername(value: unknown) {
-  return String(value ?? "")
-    .trim()
-    .toLowerCase();
 }
 
 export async function login(
@@ -62,33 +50,21 @@ export async function login(
   password: string,
   branchId?: string | null
 ) {
-  const normalizedUsername = normalizeUsername(username);
+  const normalizedUsername = String(username || "").trim();
 
-  if (!normalizedUsername || !password) {
-    return null;
-  }
-
-  const users = await db.user.findMany({
+  const user = await db.user.findFirst({
     where: {
-      active: true
-    },
-    take: 100
+      username: normalizedUsername,
+      active: true,
+      ...(branchId ? { branchId } : {})
+    }
   });
-
-  const user = users.find(
-    (item) =>
-      normalizeUsername(item.username) === normalizedUsername &&
-      (!branchId || item.branchId === branchId || item.branchId === null)
-  );
 
   if (!user) {
     return null;
   }
 
-  const valid = await bcrypt.compare(
-    String(password),
-    user.passwordHash
-  );
+  const valid = await bcrypt.compare(password, user.passwordHash);
 
   if (!valid) {
     return null;
@@ -108,46 +84,31 @@ export async function login(
   };
 }
 
-export function setSession(
-  res: express.Response,
-  token: string
-) {
-  const isProduction =
-    process.env.NODE_ENV === "production" ||
-    process.env.NETLIFY === "true";
-
+export function setSession(res: Response, token: string) {
   res.cookie(COOKIE_NAME, token, {
     httpOnly: true,
-    secure: isProduction,
     sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
     maxAge: 12 * 60 * 60 * 1000,
     path: "/"
   });
 }
 
-export function clearSession(res: express.Response) {
-  const isProduction =
-    process.env.NODE_ENV === "production" ||
-    process.env.NETLIFY === "true";
-
+export function clearSession(res: Response) {
   res.clearCookie(COOKIE_NAME, {
     httpOnly: true,
-    secure: isProduction,
     sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
     path: "/"
   });
 }
 
-function getSession(req: express.Request) {
+function getSession(req: Request) {
   const cookieToken = req.cookies?.[COOKIE_NAME];
 
-  const authorization =
-    req.headers.authorization;
-
   const bearerToken =
-    authorization &&
-    authorization.startsWith("Bearer ")
-      ? authorization.substring(7).trim()
+    req.headers.authorization?.startsWith("Bearer ")
+      ? req.headers.authorization.substring(7)
       : undefined;
 
   const token = cookieToken || bearerToken;
@@ -164,9 +125,9 @@ function getSession(req: express.Request) {
 }
 
 export function requireAuth(
-  req: express.Request,
-  res: express.Response,
-  next: express.NextFunction
+  req: Request,
+  res: Response,
+  next: NextFunction
 ) {
   const session = getSession(req);
 
@@ -177,17 +138,15 @@ export function requireAuth(
   }
 
   (req as any).session = session;
-
   next();
 }
 
 export function requireAdmin(
-  req: express.Request,
-  res: express.Response,
-  next: express.NextFunction
+  req: Request,
+  res: Response,
+  next: NextFunction
 ) {
-  const session =
-    (req as any).session as SessionPayload | undefined;
+  const session = (req as any).session as SessionPayload | undefined;
 
   if (
     !session ||
@@ -202,12 +161,11 @@ export function requireAdmin(
 }
 
 export function requireSuperAdmin(
-  req: express.Request,
-  res: express.Response,
-  next: express.NextFunction
+  req: Request,
+  res: Response,
+  next: NextFunction
 ) {
-  const session =
-    (req as any).session as SessionPayload | undefined;
+  const session = (req as any).session as SessionPayload | undefined;
 
   if (!session || session.role !== "SUPER_ADMIN") {
     return res.status(403).json({
@@ -219,11 +177,10 @@ export function requireSuperAdmin(
 }
 
 export function branchScope(
-  req: express.Request,
+  req: Request,
   requestedBranchId?: string | null
 ) {
-  const session =
-    (req as any).session as SessionPayload | undefined;
+  const session = (req as any).session as SessionPayload | undefined;
 
   if (!session) {
     return null;

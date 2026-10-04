@@ -1,4 +1,5 @@
-import { receiptPdf } from "./pdf";
+
+
 import "dotenv/config";
 
 import express from "express";
@@ -14,8 +15,6 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 
 import QRCode from "qrcode";
-import PDFDocument from "pdfkit";
-
 import {
   Prisma,
   OrderSource,
@@ -25,14 +24,40 @@ import {
 } from "@prisma/client";
 
 import { db } from "./db";
+import { receiptPdf } from "./pdf";
 import {
   login,
-  signSession,
-  verifySession,
+  setSession,
+  clearSession,
+  requireAuth,
   hashPassword
 } from "./auth";
 
 const app = express();
+/* SGAR_LOGIN_ROUTE */
+
+app.get("/pos/login.html", (_req, res) => {
+
+  res.setHeader(
+    "Cache-Control",
+    "no-store, no-cache, must-revalidate, proxy-revalidate"
+  );
+
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+
+  res.sendFile(
+    path.join(
+      __dirname,
+      "../public/pos/login.html"
+    )
+  );
+});
+
+/* END SGAR_LOGIN_ROUTE */
+
+
+
 
 const PORT = Number(process.env.PORT || 4000);
 const IS_NETLIFY = process.env.NETLIFY === "true";
@@ -92,68 +117,6 @@ function safeError(error: unknown) {
   }
 
   return "Something went wrong";
-}
-
-function getSession(req: express.Request) {
-  const token =
-    req.cookies?.sgar_session ||
-    (
-      req.headers.authorization?.startsWith("Bearer ")
-        ? req.headers.authorization.substring(7)
-        : undefined
-    );
-
-  if (!token) {
-    return null;
-  }
-
-  try {
-    return verifySession(token);
-  } catch {
-    return null;
-  }
-}
-
-function requireAuth(
-  req: express.Request,
-  res: express.Response,
-  next: express.NextFunction
-) {
-  const session = getSession(req);
-
-  if (!session) {
-    return res.status(401).json({
-      error: "Authentication required"
-    });
-  }
-
-  (req as any).session = session;
-
-  next();
-}
-
-function setSession(
-  res: express.Response,
-  user: any
-) {
-  const token = signSession(user);
-
-  res.cookie("sgar_session", token, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    maxAge: 12 * 60 * 60 * 1000,
-    path: "/"
-  });
-}
-
-function clearSession(res: express.Response) {
-  res.clearCookie("sgar_session", {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/"
-  });
 }
 
 function isAdminRole(role: string) {
@@ -826,18 +789,28 @@ app.post(
         });
       }
 
-      const user =
+      const result =
         await login(
           username,
           password,
           branchId
         );
 
-      setSession(res, user);
+      if (!result) {
+        return res.status(401).json({
+          error:
+            "Invalid username or password"
+        });
+      }
+
+      setSession(
+        res,
+        result.token
+      );
 
       return res.json({
         ok: true,
-        user
+        user: result.user
       });
 
     } catch (error) {
@@ -1239,6 +1212,400 @@ app.post(
   }
 );
 
+
+
+app.patch(
+  "/api/users/:id",
+  requireAuth,
+  async (req, res) => {
+
+    try {
+
+      const session =
+        (req as any).session;
+
+      if(
+        !isAdminRole(
+          session.role
+        )
+      ){
+        return res.status(403).json({
+          error:
+            "Only administrators can update users"
+        });
+      }
+
+      const id =
+        String(req.params.id);
+
+      const existing =
+        await db.user.findUnique({
+          where: {
+            id
+          }
+        });
+
+      if(!existing){
+
+        return res.status(404).json({
+          error:
+            "User not found"
+        });
+
+      }
+
+      if(
+        existing.id ===
+        session.id &&
+        req.body?.active === false
+      ){
+
+        return res.status(400).json({
+          error:
+            "You cannot deactivate your own account"
+        });
+
+      }
+
+      if(
+        session.role !==
+        "SUPER_ADMIN" &&
+        existing.branchId !==
+        session.branchId
+      ){
+
+        return res.status(403).json({
+          error:
+            "Branch access denied"
+        });
+
+      }
+
+      const branchId =
+        req.body?.branchId !== undefined
+          ? String(
+              req.body.branchId || ""
+            )
+          : existing.branchId;
+
+      if(
+        session.role !==
+        "SUPER_ADMIN" &&
+        branchId !==
+        session.branchId
+      ){
+
+        return res.status(403).json({
+          error:
+            "Branch access denied"
+        });
+
+      }
+
+      if(branchId){
+
+        const branch =
+          await db.branch.findUnique({
+            where:{
+              id:branchId
+            }
+          });
+
+        if(
+          !branch ||
+          !branch.active
+        ){
+
+          return res.status(400).json({
+            error:
+              "Invalid branch"
+          });
+
+        }
+
+      }
+
+      const role =
+        req.body?.role !== undefined
+          ? String(
+              req.body.role
+            )
+          : existing.role;
+
+      const allowedRoles = [
+        "SUPER_ADMIN",
+        "ADMIN",
+        "MANAGER",
+        "CASHIER",
+        "KITCHEN"
+      ];
+
+      if(
+        !allowedRoles.includes(
+          role
+        )
+      ){
+
+        return res.status(400).json({
+          error:
+            "Invalid role"
+        });
+
+      }
+
+      if(
+        role ===
+        "SUPER_ADMIN" &&
+        session.role !==
+        "SUPER_ADMIN"
+      ){
+
+        return res.status(403).json({
+          error:
+            "Only SUPER_ADMIN can assign SUPER_ADMIN"
+        });
+
+      }
+
+      const data =
+        {
+          name:
+            req.body?.name !== undefined
+              ? String(
+                  req.body.name
+                ).trim()
+              : undefined,
+
+          username:
+            req.body?.username !== undefined
+              ? String(
+                  req.body.username
+                ).trim()
+              : undefined,
+
+          role:
+            role as Role,
+
+          branchId:
+            branchId || null,
+
+          active:
+            req.body?.active !== undefined
+              ? Boolean(
+                  req.body.active
+                )
+              : undefined
+        };
+
+      const password =
+        req.body?.password
+          ? String(
+              req.body.password
+            )
+          : "";
+
+      if(password){
+
+        if(
+          password.length < 8
+        ){
+
+          return res.status(400).json({
+            error:
+              "Password must contain at least 8 characters"
+          });
+
+        }
+
+        (data as any)
+          .passwordHash =
+          await hashPassword(
+            password
+          );
+
+      }
+
+      if(
+        (data as any).username &&
+        (data as any).username !==
+        existing.username
+      ){
+
+        const duplicate =
+          await db.user.findUnique({
+            where:{
+              username:
+                (data as any).username
+            }
+          });
+
+        if(
+          duplicate &&
+          duplicate.id !== id
+        ){
+
+          return res.status(409).json({
+            error:
+              "Username already exists"
+          });
+
+        }
+
+      }
+
+      const user =
+        await db.user.update({
+          where:{
+            id
+          },
+
+          data:
+            data as any,
+
+          select:{
+            id:true,
+            name:true,
+            username:true,
+            role:true,
+            active:true,
+            branchId:true
+          }
+        });
+
+      await audit(
+        "USER_UPDATED",
+        "User",
+        id,
+        {},
+        session.id,
+        user.branchId ||
+        session.branchId
+      );
+
+      res.json({
+        user
+      });
+
+    }catch(error){
+
+      res.status(400).json({
+        error:
+          safeError(error)
+      });
+
+    }
+
+  }
+);
+
+app.delete(
+  "/api/users/:id",
+  requireAuth,
+  async (req, res) => {
+
+    try{
+
+      const session =
+        (req as any).session;
+
+      if(
+        !isAdminRole(
+          session.role
+        )
+      ){
+
+        return res.status(403).json({
+          error:
+            "Only administrators can disable users"
+        });
+
+      }
+
+      const id =
+        String(req.params.id);
+
+      const existing =
+        await db.user.findUnique({
+          where:{
+            id
+          }
+        });
+
+      if(!existing){
+
+        return res.status(404).json({
+          error:
+            "User not found"
+        });
+
+      }
+
+      if(
+        existing.id ===
+        session.id
+      ){
+
+        return res.status(400).json({
+          error:
+            "You cannot disable your own account"
+        });
+
+      }
+
+      if(
+        session.role !==
+        "SUPER_ADMIN" &&
+        existing.branchId !==
+        session.branchId
+      ){
+
+        return res.status(403).json({
+          error:
+            "Branch access denied"
+        });
+
+      }
+
+      const user =
+        await db.user.update({
+          where:{
+            id
+          },
+
+          data:{
+            active:false
+          }
+        });
+
+      await audit(
+        "USER_DISABLED",
+        "User",
+        id,
+        {},
+        session.id,
+        existing.branchId
+      );
+
+      res.json({
+        ok:true,
+        user:{
+          id:user.id,
+          active:user.active
+        }
+      });
+
+    }catch(error){
+
+      res.status(400).json({
+        error:
+          safeError(error)
+      });
+
+    }
+
+  }
+);
+
 /* ============================================================
    BRANCHES
    ============================================================ */
@@ -1292,6 +1659,8 @@ app.get(
           address: true,
           phone: true,
           gstin: true,
+          fssai: true,
+          receiptConfig: true,
           invoicePrefix: true,
           receiptHeader: true,
           receiptFooter: true,
@@ -1371,6 +1740,8 @@ app.post(
             gstin:
               req.body?.gstin ||
               undefined,
+            fssai: req.body?.fssai || undefined,
+            receiptConfig: req.body?.receiptConfig || undefined,
             invoicePrefix:
               req.body?.invoicePrefix ||
               "INV",
@@ -1458,7 +1829,31 @@ app.patch(
       }
 
       const id =
-        req.params.id;
+        String(req.params.id);
+
+      const existingBranch =
+        await db.branch.findUnique({
+          where: {
+            id
+          }
+        });
+
+      if (!existingBranch) {
+        return res.status(404).json({
+          error:
+            "Branch not found"
+        });
+      }
+
+      if (
+        session.role !== "SUPER_ADMIN" &&
+        existingBranch.id !== session.branchId
+      ) {
+        return res.status(403).json({
+          error:
+            "Branch access denied"
+        });
+      }
 
       const branch =
         await db.branch.update({
@@ -1497,6 +1892,16 @@ app.patch(
             gstin:
               req.body?.gstin !== undefined
                 ? req.body.gstin || null
+                : undefined,
+
+            fssai:
+              req.body?.fssai !== undefined
+                ? req.body.fssai || null
+                : undefined,
+
+            receiptConfig:
+              req.body?.receiptConfig !== undefined
+                ? req.body.receiptConfig || null
                 : undefined,
 
             invoicePrefix:
@@ -3401,11 +3806,495 @@ app.get(
   }
 );
 
+
+
+/* ============================================================
+   PRINTERS
+   ============================================================ */
+
+app.get(
+  "/api/printers",
+  requireAuth,
+  async (req, res) => {
+
+    try{
+
+      const branchId =
+        branchScope(req);
+
+      if(!branchId){
+
+        return res.status(400).json({
+          error:
+            "A branch is required"
+        });
+
+      }
+
+      if(
+        !(await ensureBranchAccess(
+          req,
+          branchId
+        ))
+      ){
+
+        return res.status(403).json({
+          error:
+            "Branch access denied"
+        });
+
+      }
+
+      const printers =
+        await db.printer.findMany({
+          where:{
+            branchId
+          },
+
+          orderBy:{
+            name:"asc"
+          }
+        });
+
+      res.json(
+        printers
+      );
+
+    }catch(error){
+
+      res.status(400).json({
+        error:
+          safeError(error)
+      });
+
+    }
+
+  }
+);
+
+app.post(
+  "/api/printers",
+  requireAuth,
+  async (req, res) => {
+
+    try{
+
+      const session =
+        (req as any).session;
+
+      if(
+        !isAdminRole(
+          session.role
+        )
+      ){
+
+        return res.status(403).json({
+          error:
+            "Only administrators can manage printers"
+        });
+
+      }
+
+      const branchId =
+        String(
+          req.body?.branchId ||
+          session.branchId ||
+          ""
+        );
+
+      if(
+        !branchId ||
+        !(await ensureBranchAccess(
+          req,
+          branchId
+        ))
+      ){
+
+        return res.status(403).json({
+          error:
+            "Branch access denied"
+        });
+
+      }
+
+      const name =
+        String(
+          req.body?.name || ""
+        ).trim();
+
+      if(!name){
+
+        return res.status(400).json({
+          error:
+            "Printer name is required"
+        });
+
+      }
+
+      const printer =
+        await db.printer.create({
+
+          data:{
+
+            name,
+
+            type:
+              String(
+                req.body?.type ||
+                "RECEIPT"
+              ),
+
+            connection:
+              String(
+                req.body?.connection ||
+                "USB"
+              ),
+
+            host:
+              req.body?.host ||
+              null,
+
+            port:
+              req.body?.port
+                ? Number(
+                    req.body.port
+                  )
+                : null,
+
+            paperWidth:
+              Number(
+                req.body?.paperWidth ||
+                80
+              ),
+
+            copies:
+              Math.max(
+                1,
+                Number(
+                  req.body?.copies ||
+                  1
+                )
+              ),
+
+            receiptOn:
+              req.body?.receiptOn !==
+              false,
+
+            kotOn:
+              req.body?.kotOn !==
+              false,
+
+            active:
+              req.body?.active !==
+              false,
+
+            branchId
+
+          }
+
+        });
+
+      await audit(
+        "PRINTER_CREATED",
+        "Printer",
+        printer.id,
+        {},
+        session.id,
+        branchId
+      );
+
+      res.status(201).json({
+        printer
+      });
+
+    }catch(error){
+
+      res.status(400).json({
+        error:
+          safeError(error)
+      });
+
+    }
+
+  }
+);
+
+app.patch(
+  "/api/printers/:id",
+  requireAuth,
+  async (req, res) => {
+
+    try{
+
+      const session =
+        (req as any).session;
+
+      if(
+        !isAdminRole(
+          session.role
+        )
+      ){
+
+        return res.status(403).json({
+          error:
+            "Only administrators can manage printers"
+        });
+
+      }
+
+      const id =
+        String(req.params.id);
+
+      const existing =
+        await db.printer.findUnique({
+          where:{
+            id
+          }
+        });
+
+      if(!existing){
+
+        return res.status(404).json({
+          error:
+            "Printer not found"
+        });
+
+      }
+
+      if(
+        !(await ensureBranchAccess(
+          req,
+          existing.branchId
+        ))
+      ){
+
+        return res.status(403).json({
+          error:
+            "Branch access denied"
+        });
+
+      }
+
+      const printer =
+        await db.printer.update({
+
+          where:{
+            id
+          },
+
+          data:{
+
+            name:
+              req.body?.name !==
+              undefined
+                ? String(
+                    req.body.name
+                  ).trim()
+                : undefined,
+
+            type:
+              req.body?.type !==
+              undefined
+                ? String(
+                    req.body.type
+                  )
+                : undefined,
+
+            connection:
+              req.body?.connection !==
+              undefined
+                ? String(
+                    req.body.connection
+                  )
+                : undefined,
+
+            host:
+              req.body?.host !==
+              undefined
+                ? req.body.host ||
+                  null
+                : undefined,
+
+            port:
+              req.body?.port !==
+              undefined
+                ? req.body.port
+                  ? Number(
+                      req.body.port
+                    )
+                  : null
+                : undefined,
+
+            paperWidth:
+              req.body?.paperWidth !==
+              undefined
+                ? Number(
+                    req.body.paperWidth
+                  )
+                : undefined,
+
+            copies:
+              req.body?.copies !==
+              undefined
+                ? Math.max(
+                    1,
+                    Number(
+                      req.body.copies
+                    )
+                  )
+                : undefined,
+
+            receiptOn:
+              req.body?.receiptOn !==
+              undefined
+                ? Boolean(
+                    req.body.receiptOn
+                  )
+                : undefined,
+
+            kotOn:
+              req.body?.kotOn !==
+              undefined
+                ? Boolean(
+                    req.body.kotOn
+                  )
+                : undefined,
+
+            active:
+              req.body?.active !==
+              undefined
+                ? Boolean(
+                    req.body.active
+                  )
+                : undefined
+
+          }
+
+        });
+
+      await audit(
+        "PRINTER_UPDATED",
+        "Printer",
+        id,
+        {},
+        session.id,
+        existing.branchId
+      );
+
+      res.json({
+        printer
+      });
+
+    }catch(error){
+
+      res.status(400).json({
+        error:
+          safeError(error)
+      });
+
+    }
+
+  }
+);
+
+app.delete(
+  "/api/printers/:id",
+  requireAuth,
+  async (req, res) => {
+
+    try{
+
+      const session =
+        (req as any).session;
+
+      if(
+        !isAdminRole(
+          session.role
+        )
+      ){
+
+        return res.status(403).json({
+          error:
+            "Only administrators can disable printers"
+        });
+
+      }
+
+      const id =
+        String(req.params.id);
+
+      const existing =
+        await db.printer.findUnique({
+          where:{
+            id
+          }
+        });
+
+      if(!existing){
+
+        return res.status(404).json({
+          error:
+            "Printer not found"
+        });
+
+      }
+
+      if(
+        !(await ensureBranchAccess(
+          req,
+          existing.branchId
+        ))
+      ){
+
+        return res.status(403).json({
+          error:
+            "Branch access denied"
+        });
+
+      }
+
+      const printer =
+        await db.printer.update({
+
+          where:{
+            id
+          },
+
+          data:{
+            active:false
+          }
+
+        });
+
+      await audit(
+        "PRINTER_DISABLED",
+        "Printer",
+        id,
+        {},
+        session.id,
+        existing.branchId
+      );
+
+      res.json({
+        ok:true,
+        printer
+      });
+
+    }catch(error){
+
+      res.status(400).json({
+        error:
+          safeError(error)
+      });
+
+    }
+
+  }
+);
+
 /* ============================================================
    RECEIPT PDF
    ============================================================ */
-
-
 
 /* ============================================================
    STATIC FILES
@@ -3633,88 +4522,183 @@ process.on(
   shutdown
 );
 
-if (
-  require.main === module
-) {
-  server.listen(
-    PORT,
-    "0.0.0.0",
-    () => {
-      console.log(
-        `Sri Ganapathy Andhra's Ruchulu POS running on ${PORT}`
-      );
-    }
-  );
-}
-
 /* ============================================================
-   SGAR PRODUCTION RECEIPT PDF
+   PRODUCTION RECEIPT PDF
    ============================================================ */
 
 app.get(
   "/api/orders/:id/pdf",
   requireAuth,
   async (req, res) => {
-    try {
 
-      const order = await db.order.findUnique({
-        where: {
-          id: String(req.params.id)
-        },
-        include: {
-          branch: true,
-          bench: true,
-          cashier: {
-            select: {
-              name: true
-            }
+    try{
+
+      const order =
+        await db.order.findUnique({
+
+          where:{
+            id:
+              String(
+                req.params.id
+              )
           },
-          lines: {
-            include: {
-              menuItem: true
-            }
-          }
-        }
-      });
 
-      if (!order) {
-        return res.status(404).json({
-          error: "Order not found"
+          include:{
+
+            branch:true,
+
+            bench:true,
+
+            cashier:{
+              select:{
+                name:true
+              }
+            },
+
+            lines:{
+              include:{
+                menuItem:true
+              }
+            }
+
+          }
+
         });
+
+      if(!order){
+
+        return res.status(404).json({
+          error:
+            "Order not found"
+        });
+
       }
+
+      const session =
+        (req as any).session;
+
+      if(
+        session.role !==
+        "SUPER_ADMIN" &&
+        session.role !==
+        "ADMIN" &&
+        order.branchId !==
+        session.branchId
+      ){
+
+        return res.status(403).json({
+          error:
+            "Branch access denied"
+        });
+
+      }
+
+      await receiptPdf(
+        res,
+        order
+      );
+
+    }catch(error){
+
+      if(!res.headersSent){
+
+        res.status(400).json({
+          error:
+            safeError(error)
+        });
+
+      }
+
+    }
+
+  }
+);
+
+if(
+  require.main ===
+  module
+){
+
+  server.listen(
+    PORT,
+    "0.0.0.0",
+    () => {
+
+      console.log(
+        "Sri Ganapathy Andhra's Ruchulu POS running on " +
+        PORT
+      );
+
+    }
+  );
+
+}
+
+
+/* ============================================================
+   PRODUCTION AUTH SESSION CHECK
+   ============================================================ */
+
+app.get(
+  "/api/auth/me",
+  requireAuth,
+  async (req, res) => {
+    try {
 
       const session = (req as any).session;
 
-      if (
-        session.role !== "SUPER_ADMIN" &&
-        session.role !== "ADMIN" &&
-        order.branchId !== session.branchId
-      ) {
-        return res.status(403).json({
-          error: "Branch access denied"
+      if (!session || !session.userId) {
+        return res.status(401).json({
+          error: "Authentication required"
         });
       }
 
-      await receiptPdf(res, order);
+      const user = await db.user.findUnique({
+        where: {
+          id: session.userId
+        },
+        select: {
+          id: true,
+          username: true,
+          name: true,
+          role: true,
+          active: true,
+          branchId: true
+        }
+      });
+
+      if (!user || !user.active) {
+
+        clearSession(res);
+
+        return res.status(401).json({
+          error: "Session expired"
+        });
+      }
+
+      return res.json({
+        ok: true,
+        user
+      });
 
     } catch (error) {
 
       console.error(
-        "Receipt PDF generation failed:",
+        "Auth session check failed:",
         error
       );
 
-      if (!res.headersSent) {
-        return res.status(500).json({
-          error: "Unable to generate receipt PDF"
-        });
-      }
+      return res.status(500).json({
+        error: "Unable to validate session"
+      });
     }
   }
 );
-
-
 export {
   app,
   server
 };
+
+
+
+

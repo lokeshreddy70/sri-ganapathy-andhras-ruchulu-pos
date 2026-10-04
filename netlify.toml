@@ -3,6 +3,9 @@
   publish = "public"
   functions = "netlify/functions"
 
+[build.environment]
+  NODE_VERSION = "20"
+
 [functions]
   node_bundler = "esbuild"
   included_files = [
@@ -14,28 +17,52 @@
   from = "/api/*"
   to = "/.netlify/functions/api/:splat"
   status = 200
+  force = true
 
 [[redirects]]
-  from = "/"
-  to = "/pos/"
+  from = "/health"
+  to = "/.netlify/functions/api/health"
   status = 200
+  force = true
 
 [[redirects]]
   from = "/pos"
-  to = "/pos/"
+  to = "/"
   status = 301
+  force = true
+
+[[redirects]]
+  from = "/pos/"
+  to = "/"
+  status = 301
+  force = true
 
 [[redirects]]
   from = "/admin"
-  to = "/admin/"
+  to = "/"
   status = 301
+  force = true
+
+[[redirects]]
+  from = "/admin/"
+  to = "/"
+  status = 301
+  force = true
 
 [[redirects]]
   from = "/kds"
-  to = "/kds/"
+  to = "/"
   status = 301
+  force = true
+
+[[redirects]]
+  from = "/kds/"
+  to = "/"
+  status = 301
+  force = true
 
 [[redirects]]
   from = "/order/*"
-  to = "/customer/"
+  to = "/customer/?token=:splat"
   status = 200
+  force = true

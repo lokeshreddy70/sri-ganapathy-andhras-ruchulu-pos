@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+<style id="SGAR_AUTH_BOOTSTRAP_STYLE_V2">
+html.sgar-auth-checking body {
+    visibility: hidden !important;
+}
+
+html.sgar-auth-checking::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 2147483647;
+    background: #ffffff;
+}
+
+html.sgar-auth-ready body {
+    visibility: visible !important;
+}
+
+#sgar-auth-loading {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483646;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    font-family: Arial, sans-serif;
+}
+
+#sgar-auth-loading .sgar-auth-loading-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+}
+
+#sgar-auth-loading img {
+    width: 96px;
+    height: 96px;
+    object-fit: cover;
+    border-radius: 20px;
+}
+
+#sgar-auth-loading .sgar-auth-loading-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #111111;
+}
+
+#sgar-auth-loading .sgar-auth-loading-bar {
+    width: 120px;
+    height: 3px;
+    background: #e5e5e5;
+    overflow: hidden;
+    border-radius: 99px;
+}
+
+#sgar-auth-loading .sgar-auth-loading-bar::after {
+    content: "";
+    display: block;
+    width: 45%;
+    height: 100%;
+    background: #111111;
+    animation: sgarAuthLoader 1s infinite ease-in-out;
+}
+
+@keyframes sgarAuthLoader {
+    0% {
+        transform: translateX(-120%);
+    }
+    100% {
+        transform: translateX(340%);
+    }
+}
+</style>
+
+<script>
+document.documentElement.classList.add("sgar-auth-checking");
+</script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111111">
+<meta name="description" content="Sri Ganapathy Andhra's Ruchulu Restaurant POS">
+<link rel="icon" href="/brand/logo-primary.jpg">
+<title>Sri Ganapathy Andhra's Ruchulu</title>
+<link rel="stylesheet" href="/app.css">
+</head>
+
+<body>
+
+<div id="splash" class="splash">
+  <div class="splash-inner">
+    <div class="splash-logo-wrap">
+      <img
+        src="/brand/logo-primary.jpg"
+        class="splash-logo"
+        alt="Sri Ganapathy Andhra's Ruchulu"
+      >
+    </div>
+
+    <div class="splash-title">
+      Sri Ganapathy Andhra's Ruchulu
+    </div>
+
+    <div class="splash-loader">
+      <span></span>
+    </div>
+  </div>
+</div>
+
+<section id="login" class="login screen hidden">
+
+  <div class="login-shell">
+
+    <div class="login-brand">
+
+      <img
+        src="/brand/logo-primary.jpg"
+        class="login-logo"
+        alt=""
+      >
+
+      <h1>
+        Sri Ganapathy Andhra's Ruchulu
+      </h1>
+
+      <p>Billing</p>
+
+    </div>
+
+    <form
+      id="loginForm"
+      class="login-card"
+      autocomplete="on"
+    >
+
+      <label>
+        Username
+        <input
+          id="username"
+          autocomplete="username"
+          required
+        >
+      </label>
+
+      <label>
+        Password
+        <input
+          id="password"
+          type="password"
+          autocomplete="current-password"
+          required
+        >
+      </label>
+
+      <div
+        id="loginError"
+        class="error hidden"
+      ></div>
+
+      <button
+        id="loginBtn"
+        class="primary full"
+        type="submit"
+      >
+        Login
+      </button>
+
+    </form>
+
+    <div class="login-footer">
+      Sri Ganapathy Andhra's Ruchulu
+    </div>
+
+  </div>
+
+</section>
+
+<div id="app" class="app hidden">
+
+  <aside id="sidebar" class="sidebar">
+
+    <div class="side-brand">
+
+      <img
+        src="/brand/logo-primary.jpg"
+        alt=""
+      >
+
+      <div>
+        <b>Sri Ganapathy</b>
+        <small>Andhra's Ruchulu</small>
+      </div>
+
+    </div>
+
+    <div class="branch-box">
+
+      <small>BRANCH</small>
+
+      <select id="branchSelect"></select>
+
+    </div>
+
+    <nav id="nav">
+
+      <button data-view="dashboard">
+        ⌂
+        <span>Dashboard</span>
+      </button>
+
+      <button data-view="billing">
+        ▣
+        <span>Bill</span>
+      </button>
+
+      <button data-view="billing">
+        ▤
+        <span>POS</span>
+      </button>
+
+      <button data-view="sales">
+        ◷
+        <span>Sales</span>
+      </button>
+
+      <button data-view="reports">
+        ▥
+        <span>Reports</span>
+      </button>
+
+      <button data-view="kot">
+        ♨
+        <span>KOT</span>
+        <i id="kotCount"></i>
+      </button>
+
+      <button data-view="qr">
+        ▦
+        <span>QR Ordering</span>
+      </button>
+
+      <hr>
+
+      <button data-view="menu">
+        ☷
+        <span>Menu</span>
+      </button>
+
+      <button data-view="tables">
+        ▦
+        <span>Tables</span>
+      </button>
+
+      <button
+        class="adminOnly"
+        data-view="staff"
+      >
+        ♙
+        <span>Staff</span>
+      </button>
+
+      <button
+        class="superOnly"
+        data-view="branches"
+      >
+        ⌂
+        <span>Branches</span>
+      </button>
+
+      <button
+        class="adminOnly"
+        data-view="printers"
+      >
+        ▤
+        <span>Printers</span>
+      </button>
+
+      <button
+        class="adminOnly"
+        data-view="settings"
+      >
+        ⚙
+        <span>Settings</span>
+      </button>
+
+    </nav>
+
+    <div class="side-bottom">
+
+      <div class="user-mini">
+
+        <span id="avatar">U</span>
+
+        <div>
+          <b id="userName">User</b>
+          <small id="userRole">ROLE</small>
+        </div>
+
+      </div>
+
+      <button
+        id="logout"
+        class="logout"
+      >
+        Logout
+      </button>
+
+    </div>
+
+  </aside>
+
+  <main class="main">
+
+    <header class="top">
+
+      <button
+        id="mobile"
+        class="icon"
+      >
+        ☰
+      </button>
+
+      <div>
+
+        <b id="title">
+          Dashboard
+        </b>
+
+        <small id="subtitle">
+          Restaurant overview
+        </small>
+
+      </div>
+
+      <div class="top-right">
+
+        <span id="clock"></span>
+
+        <button
+          id="refresh"
+          class="icon"
+        >
+          ↻
+        </button>
+
+      </div>
+
+    </header>
+
+    <section
+      id="content"
+      class="content"
+    ></section>
+
+  </main>
+
+</div>
+
+<div
+  id="modal"
+  class="modal hidden"
+></div>
+
+<div
+  id="toast"
+  class="toast-root"
+></div>
+
+<script src="/app.js"></script>
+
+</body>
+</html>

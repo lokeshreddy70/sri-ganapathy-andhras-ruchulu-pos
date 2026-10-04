@@ -1,28 +1,25 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "CommonJS",
-    "moduleResolution": "Node",
-    "rootDir": ".",
-    "outDir": "./dist",
-    "strict": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "ignoreDeprecations": "6.0",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
+    "strict": false,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "sourceMap": true,
-    "declaration": false,
-    "types": [
-      "node"
-    ]
+    "outDir": "dist",
+    "sourceMap": true
   },
   "include": [
     "src/**/*.ts",
-    "prisma/**/*.ts"
+    "netlify/functions/**/*.ts"
   ],
   "exclude": [
     "node_modules",
-    "dist"
+    "dist",
+    "backup-*"
   ]
 }
