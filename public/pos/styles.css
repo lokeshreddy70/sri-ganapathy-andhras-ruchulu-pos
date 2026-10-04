@@ -1032,3 +1032,138 @@ button {
     grid-template-columns: 1fr;
   }
 }
+/* ============================================================
+   SGAR RESPONSIVE PRODUCTION LAYER
+   ============================================================ */
+
+html,
+body {
+  width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button,
+input,
+textarea,
+select {
+  max-width: 100%;
+  touch-action: manipulation;
+}
+
+img {
+  max-width: 100%;
+}
+
+@media (max-width: 1100px) {
+
+  .sidebar,
+  aside {
+    max-width: 280px;
+  }
+
+  .main-content,
+  main {
+    min-width: 0;
+  }
+
+  .grid,
+  .cards,
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+
+  body {
+    font-size: 14px;
+  }
+
+  .sidebar,
+  aside {
+    width: 100%;
+    max-width: none;
+  }
+
+  .grid,
+  .cards,
+  .stats-grid,
+  .content-grid,
+  .two-column {
+    grid-template-columns: 1fr !important;
+  }
+
+  table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .modal,
+  .dialog,
+  .drawer {
+    width: calc(100% - 20px) !important;
+    max-width: none !important;
+    max-height: 90dvh;
+    overflow-y: auto;
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    min-height: 42px;
+  }
+
+  .toolbar,
+  .actions,
+  .filters {
+    flex-wrap: wrap;
+  }
+
+  .toolbar > *,
+  .actions > *,
+  .filters > * {
+    max-width: 100%;
+  }
+
+  .page,
+  .content,
+  .main,
+  main {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+}
+
+@media (max-width: 480px) {
+
+  .page,
+  .content,
+  .main,
+  main {
+    padding-left: 7px !important;
+    padding-right: 7px !important;
+  }
+
+  .card,
+  .panel,
+  .section {
+    border-radius: 14px;
+  }
+
+  .toolbar,
+  .actions {
+    gap: 7px;
+  }
+
+  button {
+    min-height: 44px;
+  }
+}

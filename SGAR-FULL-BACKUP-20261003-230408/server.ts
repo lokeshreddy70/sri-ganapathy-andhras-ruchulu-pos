@@ -1,3 +1,5 @@
+
+
 import "dotenv/config";
 
 import express from "express";
@@ -33,6 +35,26 @@ import {
 
 const app = express();
 
+
+/* SGAR_FINAL_LOGIN_ROUTE */
+
+app.get("/pos/login.html", (_req, res) => {
+
+    res.setHeader(
+        "Cache-Control",
+        "no-store, no-cache, must-revalidate, proxy-revalidate"
+    );
+
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
+
+    res.sendFile(
+        path.join(__dirname, "../public/pos/login.html")
+    );
+
+});
+
+/* END SGAR_FINAL_LOGIN_ROUTE */
 const PORT = Number(process.env.PORT || 4000);
 const IS_NETLIFY = process.env.NETLIFY === "true";
 
@@ -3575,7 +3597,7 @@ app.get(
         );
 
         doc.text(
-          `${qty} x Γé╣${money(line.unitPrice).toFixed(2)}     Γé╣${amount}`
+          `${qty} x ₹${money(line.unitPrice).toFixed(2)}     ₹${amount}`
         );
       }
 
@@ -3584,25 +3606,25 @@ app.get(
       );
 
       doc.text(
-        `Subtotal: Γé╣${money(order.subtotal).toFixed(2)}`
+        `Subtotal: ₹${money(order.subtotal).toFixed(2)}`
       );
 
       if (money(order.discount) > 0) {
         doc.text(
-          `Discount: Γé╣${money(order.discount).toFixed(2)}`
+          `Discount: ₹${money(order.discount).toFixed(2)}`
         );
       }
 
       if (money(order.tax) > 0) {
         doc.text(
-          `Tax: Γé╣${money(order.tax).toFixed(2)}`
+          `Tax: ₹${money(order.tax).toFixed(2)}`
         );
       }
 
       doc
         .fontSize(12)
         .text(
-          `TOTAL: Γé╣${money(order.total).toFixed(2)}`
+          `TOTAL: ₹${money(order.total).toFixed(2)}`
         );
 
       doc.moveDown(0.5);
@@ -3874,3 +3896,5 @@ export {
   app,
   server
 };
+
+

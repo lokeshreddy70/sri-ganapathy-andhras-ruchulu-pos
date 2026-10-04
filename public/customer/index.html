@@ -1,18 +1,31 @@
 <!doctype html>
 <html lang="en">
-
 <head>
-
   <meta charset="UTF-8">
 
   <meta
     name="viewport"
-    content="width=device-width,initial-scale=1,viewport-fit=cover"
+    content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no"
   >
 
   <meta
     name="theme-color"
-    content="#111111"
+    content="#111827"
+  >
+
+  <meta
+    name="mobile-web-app-capable"
+    content="yes"
+  >
+
+  <meta
+    name="apple-mobile-web-app-capable"
+    content="yes"
+  >
+
+  <meta
+    name="apple-mobile-web-app-status-bar-style"
+    content="default"
   >
 
   <title>Order</title>
@@ -21,182 +34,24 @@
     rel="stylesheet"
     href="/customer/styles.css"
   >
-
 </head>
 
 <body>
 
-  <div id="loading" class="customer-loading">
-    <div class="customer-loader"></div>
-    <span>Loading menu...</span>
-  </div>
-
-  <main
-    id="customerApp"
-    class="customer-app hidden"
-  >
-
-    <header class="customer-header">
-
-      <div class="customer-brand">
-
-        <img
-          id="branchLogo"
-          src="/brand/logo-primary.jpg"
-          alt=""
-        >
-
-        <div>
-          <strong
-            id="branchName"
-          >
-            Sri Ganapathy Andhra's Ruchulu
-          </strong>
-
-          <span
-            id="benchName"
-          >
-            -
-          </span>
-        </div>
-
-      </div>
-
-      <button
-        id="cartButton"
-        class="cart-button"
-      >
-        Cart
-        <span id="cartCount">0</span>
-      </button>
-
-    </header>
-
-    <section class="customer-content">
-
-      <div
-        id="customerCategories"
-        class="customer-categories"
-      ></div>
-
-      <div
-        id="customerMenu"
-        class="customer-menu"
-      ></div>
-
-    </section>
-
-  </main>
-
   <div
-    id="cartDrawer"
-    class="customer-modal hidden"
+    id="app"
+    class="customer-app"
   >
-
-    <div class="customer-sheet">
-
-      <div class="customer-sheet-header">
-
-        <h2>
-          Your Order
-        </h2>
-
-        <button
-          id="closeCart"
-          class="customer-close"
-        >
-          ×
-        </button>
-
-      </div>
-
-      <div
-        id="cartItems"
-        class="customer-cart-items"
-      ></div>
-
-      <div class="customer-total-row">
-
-        <span>
-          Total
-        </span>
-
-        <strong id="cartTotal">
-          ₹0.00
-        </strong>
-
-      </div>
-
-      <div class="customer-form">
-
-        <input
-          id="customerName"
-          placeholder="Your name"
-          maxlength="80"
-        >
-
-        <input
-          id="customerPhone"
-          placeholder="Phone number"
-          maxlength="15"
-          inputmode="tel"
-        >
-
-        <textarea
-          id="customerNotes"
-          placeholder="Special instructions (optional)"
-          maxlength="500"
-        ></textarea>
-
-        <button
-          id="placeOrder"
-          class="customer-primary"
-        >
-          Place Order
-        </button>
-
-      </div>
-
+    <div class="screen-loading">
+      <div class="loader"></div>
+      <div>Loading menu...</div>
     </div>
-
   </div>
 
-  <div
-    id="successModal"
-    class="customer-modal hidden"
-  >
-
-    <div class="customer-sheet success-sheet">
-
-      <div class="success-icon">
-        ✓
-      </div>
-
-      <h2>
-        Order received
-      </h2>
-
-      <p>
-        Your order has been sent to the counter.
-      </p>
-
-      <div
-        id="successNumber"
-        class="success-number"
-      ></div>
-
-      <button
-        id="continueOrdering"
-        class="customer-primary"
-      >
-        Continue
-      </button>
-
-    </div>
-
-  </div>
-
-  <script src="/customer/app.js"></script>
+  <script
+    src="/customer/app.js"
+    defer
+  ></script>
 
 </body>
 </html>

@@ -45,263 +45,265 @@ enum PrintJobStatus {
 }
 
 model Branch {
-  id                  String       @id @default(cuid())
-  name                String
-  code                String       @unique
-  slug                String       @unique
-  address             String?
-  phone               String?
-  gstin               String?
-  invoicePrefix       String       @default("INV")
-  receiptHeader       String?
-  receiptFooter       String?
-  logoUrl             String?
-  invoiceTitle        String       @default("TAX INVOICE")
-  receiptPaperWidth   Int          @default(80)
-  timezone             String       @default("Asia/Kolkata")
-  currency            String       @default("INR")
-  nextInvoiceNumber   Int          @default(1)
-  upiId               String?
-  upiName             String?
-  paymentCashEnabled  Boolean      @default(true)
-  paymentUpiEnabled   Boolean      @default(true)
-  paymentCardEnabled  Boolean      @default(true)
-  taxEnabled          Boolean      @default(false)
-  taxRate             Decimal      @db.Decimal(5,2) @default(0)
-  active              Boolean      @default(true)
+  id                 String  @id @default(cuid())
+  name               String
+  code               String  @unique
+  slug               String  @unique
+  address            String?
+  phone              String?
+  gstin              String?
+  fssai              String?
+  invoicePrefix      String  @default("INV")
+  receiptHeader      String?
+  receiptFooter      String?
+  receiptConfig      Json?
+  logoUrl            String?
+  invoiceTitle       String  @default("TAX INVOICE")
+  receiptPaperWidth  Int     @default(80)
+  timezone           String  @default("Asia/Kolkata")
+  currency           String  @default("INR")
+  nextInvoiceNumber  Int     @default(1)
+  upiId              String?
+  upiName            String?
+  paymentCashEnabled Boolean @default(true)
+  paymentUpiEnabled  Boolean @default(true)
+  paymentCardEnabled Boolean @default(true)
+  taxEnabled         Boolean @default(false)
+  taxRate            Decimal @default(0) @db.Decimal(5, 2)
+  active             Boolean @default(true)
 
-  users               User[]
-  benches             Bench[]
-  menuItems           MenuItem[]
-  orders              Order[]
-  expenses            Expense[]
-  heldBills           HeldBill[]
-  printers            Printer[]
-  printJobs           PrintJob[]
-  auditLogs           AuditLog[]
+  users     User[]
+  benches   Bench[]
+  menuItems MenuItem[]
+  orders    Order[]
+  expenses  Expense[]
+  heldBills HeldBill[]
+  printers  Printer[]
+  printJobs PrintJob[]
+  auditLogs AuditLog[]
 
-  createdAt           DateTime     @default(now())
-  updatedAt           DateTime     @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model User {
-  id           String    @id @default(cuid())
+  id           String  @id @default(cuid())
   name         String
-  username     String    @unique
+  username     String  @unique
   passwordHash String
   role         Role
-  active       Boolean   @default(true)
+  active       Boolean @default(true)
 
-  branchId     String?
-  branch       Branch?   @relation(fields: [branchId], references: [id])
+  branchId String?
+  branch   Branch? @relation(fields: [branchId], references: [id])
 
-  orders       Order[]   @relation("CashierOrders")
-  auditLogs    AuditLog[]
-  heldBills    HeldBill[]
+  orders    Order[]    @relation("CashierOrders")
+  auditLogs AuditLog[]
+  heldBills HeldBill[]
 
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Bench {
-  id        String    @id @default(cuid())
-  label     String
-  token     String    @unique
-  active    Boolean   @default(true)
+  id     String  @id @default(cuid())
+  label  String
+  token  String  @unique
+  active Boolean @default(true)
 
-  branchId  String
-  branch    Branch    @relation(fields: [branchId], references: [id])
+  branchId String
+  branch   Branch @relation(fields: [branchId], references: [id])
 
   orders    Order[]
   heldBills HeldBill[]
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([branchId, label])
 }
 
 model MenuItem {
-  id          String      @id @default(cuid())
+  id          String   @id @default(cuid())
   name        String
   category    String
   description String?
   barcode     String?
   hsnCode     String?
-  taxRate     Decimal?    @db.Decimal(5,2)
-  price       Decimal     @db.Decimal(10,2)
-  active      Boolean     @default(true)
-  soldOut     Boolean     @default(false)
-  sortOrder   Int         @default(0)
+  taxRate     Decimal? @db.Decimal(5, 2)
+  price       Decimal  @db.Decimal(10, 2)
+  active      Boolean  @default(true)
+  soldOut     Boolean  @default(false)
+  sortOrder   Int      @default(0)
   imageUrl    String?
 
-  branchId    String
-  branch      Branch      @relation(fields: [branchId], references: [id])
+  branchId String
+  branch   Branch @relation(fields: [branchId], references: [id])
 
-  orderLines  OrderLine[]
+  orderLines OrderLine[]
 
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([branchId, barcode])
   @@index([branchId, active, category])
 }
 
 model Order {
-  id              String         @id @default(cuid())
-  number          Int
-  invoiceNumber   String?
+  id            String  @id @default(cuid())
+  number        Int
+  invoiceNumber String?
 
-  clientRequestId String?        @unique
+  clientRequestId String? @unique
 
-  source          OrderSource
-  status          OrderStatus    @default(PENDING)
+  source OrderSource
+  status OrderStatus @default(PENDING)
 
-  paymentMethod   PaymentMethod?
-  paymentStatus   String         @default("UNPAID")
+  paymentMethod PaymentMethod?
+  paymentStatus String         @default("UNPAID")
 
-  customerName    String?
-  customerPhone   String?
-  notes           String?
+  customerName  String?
+  customerPhone String?
+  notes         String?
 
-  subtotal        Decimal        @db.Decimal(10,2)
-  discount        Decimal        @db.Decimal(10,2) @default(0)
-  tax             Decimal        @db.Decimal(10,2) @default(0)
-  total           Decimal        @db.Decimal(10,2)
+  subtotal Decimal @db.Decimal(10, 2)
+  discount Decimal @default(0) @db.Decimal(10, 2)
+  tax      Decimal @default(0) @db.Decimal(10, 2)
+  total    Decimal @db.Decimal(10, 2)
 
-  branchId        String
-  branch          Branch         @relation(fields: [branchId], references: [id])
+  branchId String
+  branch   Branch @relation(fields: [branchId], references: [id])
 
-  benchId         String?
-  bench           Bench?         @relation(fields: [benchId], references: [id])
+  benchId String?
+  bench   Bench?  @relation(fields: [benchId], references: [id])
 
-  cashierId       String?
-  cashier         User?          @relation("CashierOrders", fields: [cashierId], references: [id])
+  cashierId String?
+  cashier   User?   @relation("CashierOrders", fields: [cashierId], references: [id])
 
-  lines           OrderLine[]
-  printJobs       PrintJob[]
+  lines     OrderLine[]
+  printJobs PrintJob[]
 
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
+  @@unique([branchId, number])
   @@index([branchId, status, createdAt])
   @@index([branchId, number])
-  @@unique([branchId, number])
 }
 
 model OrderLine {
-  id         String    @id @default(cuid())
-  quantity   Int
-  unitPrice  Decimal   @db.Decimal(10,2)
-  lineTotal  Decimal   @db.Decimal(10,2)
+  id        String  @id @default(cuid())
+  quantity  Int
+  unitPrice Decimal @db.Decimal(10, 2)
+  lineTotal Decimal @db.Decimal(10, 2)
 
-  orderId    String
-  order      Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   menuItemId String
-  menuItem   MenuItem  @relation(fields: [menuItemId], references: [id])
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
 }
 
 model HeldBill {
-  id             String   @id @default(cuid())
+  id             String  @id @default(cuid())
   customerName   String?
   customerPhone  String?
   notes          String?
-  subtotal       Decimal  @db.Decimal(10,2)
-  discount       Decimal  @db.Decimal(10,2) @default(0)
-  tax            Decimal  @db.Decimal(10,2) @default(0)
-  total           Decimal  @db.Decimal(10,2)
-  locationType   String   @default("COUNTER")
+  subtotal       Decimal @db.Decimal(10, 2)
+  discount       Decimal @default(0) @db.Decimal(10, 2)
+  tax            Decimal @default(0) @db.Decimal(10, 2)
+  total          Decimal @db.Decimal(10, 2)
+  locationType   String  @default("COUNTER")
   customLocation String?
   payload        Json
 
-  branchId       String
-  branch         Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  branchId String
+  branch   Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
 
-  benchId        String?
-  bench          Bench?  @relation(fields: [benchId], references: [id])
+  benchId String?
+  bench   Bench?  @relation(fields: [benchId], references: [id])
 
-  cashierId      String?
-  cashier        User?    @relation(fields: [cashierId], references: [id])
+  cashierId String?
+  cashier   User?   @relation(fields: [cashierId], references: [id])
 
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([branchId, updatedAt])
 }
 
 model Expense {
-  id        String    @id @default(cuid())
-  title     String
-  category  String
-  amount    Decimal   @db.Decimal(10,2)
+  id       String  @id @default(cuid())
+  title    String
+  category String
+  amount   Decimal @db.Decimal(10, 2)
 
-  branchId  String
-  branch    Branch    @relation(fields: [branchId], references: [id])
+  branchId String
+  branch   Branch @relation(fields: [branchId], references: [id])
 
-  createdAt DateTime  @default(now())
+  createdAt DateTime @default(now())
 
   @@index([branchId, createdAt])
 }
 
 model Printer {
-  id          String       @id @default(cuid())
-  name        String
-  agentToken  String?      @unique
-  type        String
-  connection  String
-  host        String?
-  port        Int?
-  paperWidth  Int          @default(80)
-  copies      Int          @default(1)
-  receiptOn   Boolean      @default(true)
-  kotOn       Boolean      @default(true)
-  active      Boolean      @default(true)
+  id         String  @id @default(cuid())
+  name       String
+  agentToken String? @unique
+  type       String
+  connection String
+  host       String?
+  port       Int?
+  paperWidth Int     @default(80)
+  copies     Int     @default(1)
+  receiptOn  Boolean @default(true)
+  kotOn      Boolean @default(true)
+  active     Boolean @default(true)
 
-  branchId    String
-  branch      Branch       @relation(fields: [branchId], references: [id])
+  branchId String
+  branch   Branch @relation(fields: [branchId], references: [id])
 
-  printJobs   PrintJob[]
+  printJobs PrintJob[]
 
-  createdAt   DateTime     @default(now())
+  createdAt DateTime @default(now())
 }
 
 model PrintJob {
-  id          String         @id @default(cuid())
-  type        String
-  status      PrintJobStatus @default(QUEUED)
-  attempts    Int            @default(0)
-  error       String?
+  id       String         @id @default(cuid())
+  type     String
+  status   PrintJobStatus @default(QUEUED)
+  attempts Int            @default(0)
+  error    String?
 
-  branchId    String
-  branch      Branch         @relation(fields: [branchId], references: [id])
+  branchId String
+  branch   Branch @relation(fields: [branchId], references: [id])
 
-  orderId     String?
-  order       Order?         @relation(fields: [orderId], references: [id])
+  orderId String?
+  order   Order?  @relation(fields: [orderId], references: [id])
 
-  printerId   String?
-  printer     Printer?       @relation(fields: [printerId], references: [id])
+  printerId String?
+  printer   Printer? @relation(fields: [printerId], references: [id])
 
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([branchId, status, createdAt])
 }
 
 model AuditLog {
-  id        String    @id @default(cuid())
-  action    String
-  entity    String
-  entityId  String?
-  metadata  Json?
+  id       String  @id @default(cuid())
+  action   String
+  entity   String
+  entityId String?
+  metadata Json?
 
-  userId    String?
-  user      User?     @relation(fields: [userId], references: [id])
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
 
-  branchId  String?
-  branch    Branch?   @relation(fields: [branchId], references: [id])
+  branchId String?
+  branch   Branch? @relation(fields: [branchId], references: [id])
 
-  createdAt DateTime  @default(now())
+  createdAt DateTime @default(now())
 
   @@index([branchId, createdAt])
 }

@@ -1,14 +1,9 @@
 [build]
-  command = "npm run build"
   publish = "public"
   functions = "netlify/functions"
 
 [functions]
   node_bundler = "esbuild"
-  included_files = [
-    "netlify/functions/fonts/**",
-    "netlify/functions/assets/**"
-  ]
 
 [[redirects]]
   from = "/api/*"
@@ -17,25 +12,35 @@
 
 [[redirects]]
   from = "/"
-  to = "/pos/"
-  status = 200
+  to = "/pos/login.html"
+  status = 302
 
 [[redirects]]
   from = "/pos"
-  to = "/pos/"
-  status = 301
+  to = "/pos/login.html"
+  status = 302
 
 [[redirects]]
   from = "/admin"
-  to = "/admin/"
-  status = 301
+  to = "/admin/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/admin/"
+  to = "/admin/index.html"
+  status = 200
 
 [[redirects]]
   from = "/kds"
-  to = "/kds/"
-  status = 301
+  to = "/kds/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/kds/"
+  to = "/kds/index.html"
+  status = 200
 
 [[redirects]]
   from = "/order/*"
-  to = "/customer/"
+  to = "/customer/index.html"
   status = 200

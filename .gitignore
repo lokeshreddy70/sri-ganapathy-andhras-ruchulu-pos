@@ -10,18 +10,25 @@ dist/
 *.dump
 *.bak
 *.backup
-*.backup-*
 *.before-*
+*.backup-*
 
 BACKUP-*/
 backup-*/
 DATABASE-BACKUP-*/
+SGAR-BEFORE-*/
 SGAR-SOURCE-BACKUP-*/
 SGAR-MASTER-*/
 FINAL-*/
 PRODUCTION-REPAIR-BACKUP-*/
+PRODUCTION-BACKUP-*/
 
 .vscode/
 .idea/
 .DS_Store
 Thumbs.db
+SGAR-BEFORE-*
+BACKUP-*
+PRODUCTION-BACKUP-*
+SERVER-REPAIR-BACKUP-*
+DATABASE-BACKUP-*
