@@ -29,7 +29,7 @@ function branchQuery(){return encodeURIComponent(requireBranch());}
 
 async function getSession(){
   try{
-    const d=await api("/api/auth/me");
+    const d=await api("/api/me");
     if(!d || !d.ok || !d.user){
       return false;
     }
