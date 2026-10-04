@@ -30,11 +30,14 @@ function branchQuery(){return encodeURIComponent(requireBranch());}
 async function getSession(){
   try{
     const d=await api("/api/me");
-    if(!d || !d.ok || !d.user){
+
+    if(!d || !d.user){
       return false;
     }
+
     state.user=d.user;
     return true;
+
   }catch(e){
     return false;
   }
